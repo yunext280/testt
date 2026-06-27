@@ -1,8 +1,15 @@
 import os, socket
-from flask import Flask, request, abort
+from flask import Flask, request, abort, render_template
 
 app = Flask(__name__)
 TOKEN = os.environ.get("TOKEN", "")
+
+VERSION = "0"
+try:
+    with open(os.path.expanduser("~/version.md")) as f:
+        VERSION = f.read().strip()
+except:
+    pass
 
 @app.before_request
 def check_token():
@@ -11,7 +18,7 @@ def check_token():
 
 @app.route("/")
 def index():
-    return "Flask is running"
+    return render_template("index.html", version=VERSION)
 
 if __name__ == "__main__":
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
