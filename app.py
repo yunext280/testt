@@ -13,6 +13,8 @@ except:
 
 @app.before_request
 def check_token():
+    if request.path.startswith("/static/"):
+        return
     if request.args.get("token") != TOKEN:
         abort(403)
 
