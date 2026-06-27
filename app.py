@@ -22,6 +22,14 @@ def check_token():
 def index():
     return render_template("index.html", version=VERSION)
 
+@app.route("/aviso")
+def aviso():
+    return render_template("aviso.html", version=VERSION)
+
+@app.route("/seotime")
+def seotime():
+    return render_template("seotime.html", version=VERSION)
+
 if __name__ == "__main__":
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

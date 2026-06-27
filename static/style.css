@@ -53,6 +53,48 @@ body, html {
     }
 }
 
+.cards-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 28vh;
+    z-index: 2;
+    position: relative;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(0, 238, 255, 0.2);
+    border-radius: 12px;
+    padding: 20px 40px;
+    width: 280px;
+    text-align: center;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+    cursor: pointer;
+}
+
+.card:hover {
+    border-color: rgba(0, 238, 255, 0.8);
+    box-shadow: 0 0 20px rgba(0, 238, 255, 0.3), 0 0 40px rgba(0, 238, 255, 0.1);
+    transform: scale(1.05);
+}
+
+.page-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    margin-top: 30vh;
+    color: #ffffff;
+}
+
 .version{
   position:fixed;
   bottom:16px;
