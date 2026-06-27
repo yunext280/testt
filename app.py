@@ -1,5 +1,5 @@
-import os, socket
-from flask import Flask, request, abort, render_template
+import os, socket, json
+from flask import Flask, request, abort, render_template, jsonify
 
 app = Flask(__name__)
 TOKEN = os.environ.get("TOKEN", "")
@@ -29,6 +29,18 @@ def aviso():
 @app.route("/seotime")
 def seotime():
     return render_template("seotime.html", version=VERSION)
+
+@app.route("/set_cookies", methods=["POST"])
+def set_cookies():
+    site = request.args.get("site", "unknown")
+    try:
+        data = request.get_json(force=True)
+        path = os.path.expanduser(f"~/{site}_cookies.json")
+        with open(path, "w") as f:
+            json.dump(data, f, indent=2)
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == "__main__":
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
