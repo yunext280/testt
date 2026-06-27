@@ -20,7 +20,7 @@ def check_token():
 
 @app.route("/")
 def index():
-    return render_template("index.html", version=VERSION)
+    return render_template("index.html", version=VERSION, token=TOKEN)
 
 @app.route("/aviso")
 def aviso():
