@@ -24,7 +24,9 @@ def index():
 
 @app.route("/aviso")
 def aviso():
-    return render_template("aviso.html", version=VERSION)
+    aviso_done = os.path.exists(os.path.expanduser("~/aviso_cookies.json"))
+    yt_done = os.path.exists(os.path.expanduser("~/youtube_cookies.json"))
+    return render_template("aviso.html", version=VERSION, aviso_done=aviso_done, yt_done=yt_done)
 
 @app.route("/seotime")
 def seotime():
