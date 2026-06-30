@@ -106,3 +106,54 @@ body, html {
   z-index:2;
   font-family:monospace
 }
+
+.bot-controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+    z-index: 2;
+    position: relative;
+}
+
+.bot-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(0, 238, 255, 0.2);
+    border-radius: 8px;
+    padding: 10px 30px;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+.bot-btn:hover:not(:disabled) {
+    border-color: rgba(0, 238, 255, 0.8);
+    box-shadow: 0 0 20px rgba(0, 238, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.bot-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.screenshot-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    z-index: 2;
+    position: relative;
+}
+
+.screenshot {
+    max-width: 90%;
+    max-height: 50vh;
+    border: 1px solid rgba(0, 238, 255, 0.3);
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 238, 255, 0.1);
+}

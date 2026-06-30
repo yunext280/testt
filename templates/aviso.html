@@ -16,10 +16,31 @@
             <a href="https://m.youtube.com/feed/library?hl=en" class="card">YouTube {% if yt_done %}✔{% endif %}</a>
             <a href="https://vk.com" class="card">VK</a>
         </div>
+        {% if aviso_done %}
+        <div class="bot-controls">
+            <button id="btnStart" class="bot-btn" onclick="botStart()" {% if bot_started %}disabled{% endif %}>Start</button>
+            <button id="btnStop" class="bot-btn" onclick="botStop()" {% if not bot_started %}disabled{% endif %}>Stop</button>
+        </div>
+        {% endif %}
+        {% if screenshot_exists %}
+        <div class="screenshot-container">
+            <img src="{{ url_for('screenshot_aviso', token=token) }}" alt="Aviso screenshot" class="screenshot">
+        </div>
+        {% endif %}
     </div>
     <div class="version">v{{ version }}</div>
     <div id="particles-js"></div>
     <script src="{{ url_for('static', filename='particles.min.js') }}"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+    function botStart() {
+        fetch("/bot/start?token={{ token }}", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({user_agent: navigator.userAgent})})
+        .then(r=>r.json()).then(()=>location.reload());
+    }
+    function botStop() {
+        fetch("/bot/stop?token={{ token }}", {method:"POST"})
+        .then(r=>r.json()).then(()=>location.reload());
+    }
+    </script>
 </body>
 </html>
