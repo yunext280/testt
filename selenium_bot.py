@@ -17,7 +17,7 @@ def create_driver(user_agent=None):
     if user_agent:
         options.add_argument(f"--user-agent={user_agent}")
     service = Service(executable_path="/usr/bin/chromedriver")
-    service.env = {"DISPLAY": ":1"}
+    service.env = {"DISPLAY": ":99"}
     return webdriver.Chrome(service=service, options=options)
 
 def load_cookies(driver, filepath):

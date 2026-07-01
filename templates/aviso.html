@@ -47,10 +47,13 @@
                         document.getElementById('streamView').style.display='block';
                         document.getElementById('loadingText').style.display='none';
                         if(streamUrl) streamUrl.style.display='block';
-                    }else{
+                    } else if(d.bot_running){
                         statusDot.className = 'status-dot connecting';
                         statusText.textContent = 'Connecting...';
                         setTimeout(check, 1000);
+                    } else {
+                        statusDot.className = 'status-dot offline';
+                        statusText.textContent = 'Offline';
                     }
                 });
             };
@@ -58,10 +61,6 @@
         })();
         </script>
         {% endif %}
-        <pre id="debugBox" style="color:#0ff;font-size:10px;text-align:left;max-height:150px;overflow-y:auto;z-index:2;position:relative;margin:20px auto;width:90%;background:rgba(0,0,0,0.5);padding:8px;border-radius:4px;"></pre>
-        <div style="z-index:2;position:relative;margin:8px auto;text-align:center;">
-            <a href="/debug?token={{ token }}" style="color:#0ff;font-size:12px;border:1px solid #0ff;padding:3px 10px;border-radius:4px;text-decoration:none;">Full Debug Page →</a>
-        </div>
     </div>
     <div class="version">v{{ version }}</div>
     <div id="particles-js"></div>
@@ -76,31 +75,6 @@
         fetch("/bot/stop?token={{ token }}", {method:"POST"})
         .then(r=>r.json()).then(()=>location.reload());
     }
-    function updateDebug(){
-        fetch("/flask_debug?token={{ token }}").then(r=>r.json()).then(d=>{
-            var box=document.getElementById('debugBox');
-            if(box){
-                var active=d.active?"Live":"Offline";
-                var bot=d.bot_running?"Running":"Stopped";
-                box.textContent="Status: "+active+" | Bot: "+bot+" | Frames: "+d.frame_count+"\nStream: "+d.stream_url+"\n"+d.log.join("\n");
-                box.scrollTop=box.scrollHeight;
-            }
-            if(!d.active&&d.bot_running){
-                var dot=document.getElementById('statusDot');
-                var txt=document.getElementById('statusText');
-                if(dot){dot.className='status-dot connecting';}
-                if(txt){txt.textContent='Connecting...';}
-            }
-            if(!d.bot_running){
-                var dot=document.getElementById('statusDot');
-                var txt=document.getElementById('statusText');
-                if(dot){dot.className='status-dot offline';}
-                if(txt){txt.textContent='Offline';}
-            }
-        }).catch(function(){});
-    }
-    setInterval(updateDebug, 2000);
-    updateDebug();
     </script>
 </body>
 </html>

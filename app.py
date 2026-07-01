@@ -1,20 +1,11 @@
 import os, socket, json, threading, time
 from flask import Flask, request, abort, render_template, jsonify, send_file, Response
 import selenium_bot
-import logging
 
 app = Flask(__name__)
-app.debug = True
 TOKEN = os.environ.get("TOKEN", "")
 
 latest_frame = None
-frame_counter = 0
-debug_log = []
-def _log(msg):
-    t = time.strftime("%H:%M:%S")
-    debug_log.append(f"[{t}] {msg}")
-    if len(debug_log) > 100:
-        debug_log.pop(0)
 
 VERSION = "0"
 try:
@@ -22,19 +13,6 @@ try:
         VERSION = f.read().strip()
 except:
     pass
-
-class FlaskLogHandler(logging.Handler):
-    def emit(self, record):
-        _log(f"[Flask] {record.getMessage()}")
-
-logging.getLogger("werkzeug").addHandler(FlaskLogHandler())
-
-def get_port():
-    try:
-        with open(os.path.expanduser("~/flask.port")) as f:
-            return int(f.read().strip())
-    except:
-        return 5001
 
 @app.before_request
 def check_token():
@@ -76,7 +54,6 @@ def set_cookies():
         path = os.path.expanduser(f"~/{site}_cookies.json")
         with open(path, "w") as f:
             json.dump(data, f, indent=2)
-        _log(f"Cookies saved: {site}")
         return jsonify({"status": "ok"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -86,7 +63,6 @@ def bot_start():
     data = request.get_json(force=True)
     user_agent = data.get("user_agent", "")
     started = selenium_bot.start_bot(user_agent)
-    _log(f"Bot start: {started}")
     sel_path = os.path.expanduser("~/sel_bot.json")
     with open(sel_path, "w") as f:
         json.dump({"start": started}, f)
@@ -95,7 +71,6 @@ def bot_start():
 @app.route("/bot/stop", methods=["POST"])
 def bot_stop():
     selenium_bot.stop_bot()
-    _log("Bot stop")
     sel_path = os.path.expanduser("~/sel_bot.json")
     with open(sel_path, "w") as f:
         json.dump({"start": False}, f)
@@ -109,8 +84,7 @@ def screenshot_aviso():
     return "", 404
 
 def listen_udp():
-    global latest_frame, frame_counter
-    _log("UDP listener started on port 9999")
+    global latest_frame
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(('127.0.0.1', 9999))
     sock.settimeout(1)
@@ -126,9 +100,6 @@ def listen_udp():
                 buf += data
             if b'\xff\xd9' in buf:
                 latest_frame = buf[:buf.find(b'\xff\xd9')+2]
-                frame_counter += 1
-                if frame_counter % 30 == 1:
-                    _log(f"Frame #{frame_counter} received")
                 buf = b''
         except socket.timeout:
             continue
@@ -147,35 +118,7 @@ def video_feed():
 
 @app.route("/stream_status")
 def stream_status():
-    return jsonify({"active": latest_frame is not None})
-
-@app.route("/flask_debug")
-def flask_debug():
-    port = get_port()
-    return jsonify({
-        "log": list(debug_log),
-        "active": latest_frame is not None,
-        "bot_running": selenium_bot.is_running(),
-        "frame_count": frame_counter,
-        "stream_url": f"http://127.0.0.1:{port}/video_feed?token={TOKEN}"
-    })
-
-@app.route("/debug")
-def debug():
-    port = get_port()
-    stream_url = f"http://127.0.0.1:{port}/video_feed?token={TOKEN}"
-    aviso_done = os.path.exists(os.path.expanduser("~/aviso_cookies.json"))
-    yt_done = os.path.exists(os.path.expanduser("~/youtube_cookies.json"))
-    return render_template("debug.html",
-        stream_active=latest_frame is not None,
-        bot_running=selenium_bot.is_running(),
-        frame_count=frame_counter,
-        stream_url=stream_url,
-        aviso_done=aviso_done,
-        yt_done=yt_done,
-        log=list(debug_log),
-        version=VERSION,
-        token=TOKEN)
+    return jsonify({"active": latest_frame is not None, "bot_running": selenium_bot.is_running()})
 
 if __name__ == "__main__":
     threading.Thread(target=listen_udp, daemon=True).start()
@@ -187,4 +130,4 @@ if __name__ == "__main__":
     sock.close()
     with open(os.path.expanduser("~/flask.port"), "w") as f:
         f.write(str(port))
-    app.run(host="127.0.0.1", port=port, debug=True, use_reloader=False)
+    app.run(host="127.0.0.1", port=port, use_reloader=False)
