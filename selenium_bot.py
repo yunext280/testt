@@ -50,7 +50,8 @@ def _bot_worker(user_agent):
         if os.path.exists(cookie_path):
             load_cookies(driver, cookie_path)
             driver.get("https://aviso.bz")
-            time.sleep(5)
+            time.sleep(3)
+        driver.save_screenshot(os.path.expanduser("~/aviso_screenshot.png"))
         ffmpeg_cmd = [
             'ffmpeg', '-y',
             '-f', 'x11grab',

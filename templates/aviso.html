@@ -23,13 +23,8 @@
         {% endif %}
         {% if screenshot_exists %}
         <div class="screenshot-container">
-            <img src="{{ url_for('screenshot_aviso', token=token) }}" alt="Aviso screenshot" class="screenshot">
-        </div>
-        {% endif %}
-        {% if bot_started %}
-        <div class="stream-container" id="streamContainer">
-            <p class="loading-text" id="loadingText">Loading...</p>
-            <img src="" id="streamView" class="stream-view" style="display:none">
+            <h3 id="loadingText" style="color: #fff; position: absolute; top: 45%;">جاري تشغيل البث...</h3>
+            <img id="streamView" class="stream-view" style="display:none" alt="البث الحي للمتصفح">
         </div>
         <script>
         (function(){
