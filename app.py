@@ -1,7 +1,6 @@
 import os, socket, json, threading, time
 from flask import Flask, request, abort, render_template, jsonify, send_file, Response
 import selenium_bot
-import http.cookiejar, urllib.request
 
 app = Flask(__name__)
 TOKEN = os.environ.get("TOKEN", "")
@@ -109,60 +108,6 @@ def video_feed():
 @app.route("/stream_status")
 def stream_status():
     return jsonify({"active": latest_frame is not None, "bot_running": selenium_bot.is_running()})
-
-@app.route("/check_session")
-def check_session():
-    site = request.args.get("site")
-    user_agent = request.headers.get("X-User-Agent", "")
-    path = os.path.expanduser(f"~/{site}_cookies.json")
-    if not os.path.exists(path):
-        return jsonify({"valid": False})
-    with open(path) as f:
-        cookies_data = json.load(f)
-    cj = http.cookiejar.MozillaCookieJar()
-    for c in cookies_data:
-        try:
-            name = c.get("name", "")
-            value = c.get("value", "")
-            domain = c.get("domain", "").lstrip(".")
-            cookie_path = c.get("path", "/")
-            secure = c.get("secure", False)
-            ck = http.cookiejar.Cookie(
-                version=0, name=name, value=value,
-                port=None, port_specified=False,
-                domain=domain, domain_specified=bool(domain),
-                domain_initial_dot=False,
-                path=cookie_path, path_specified=True,
-                secure=secure, expires=None,
-                discard=True, comment=None, comment_url=None,
-                rest={}, rfc2109=False
-            )
-            cj.set_cookie(ck)
-        except:
-            pass
-    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
-    if site == "aviso":
-        req = urllib.request.Request("https://aviso.bz/members")
-        req.add_header("User-Agent", user_agent)
-        try:
-            res = opener.open(req)
-            valid = "/members" in res.geturl()
-        except:
-            valid = False
-    elif site == "youtube":
-        req = urllib.request.Request("https://www.youtube.com/feed/library?hl=en")
-        req.add_header("User-Agent", user_agent)
-        try:
-            res = opener.open(req)
-            html = res.read().decode("utf-8", errors="ignore")
-            valid = "ytSpecAvatarShapeAvatarSizeExtraSmall" in html
-        except:
-            valid = False
-    else:
-        valid = False
-    if not valid and os.path.exists(path):
-        os.remove(path)
-    return jsonify({"valid": valid})
 
 if __name__ == "__main__":
     threading.Thread(target=listen_udp, daemon=True).start()

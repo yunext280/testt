@@ -75,31 +75,6 @@
         fetch("/bot/stop?token={{ token }}", {method:"POST"})
         .then(r=>r.json()).then(()=>location.reload());
     }
-    (function(){
-        var ua = navigator.userAgent;
-        fetch("/check_session?site=aviso&token={{ token }}", {
-            headers: {"X-User-Agent": ua}
-        }).then(function(r){return r.json()}).then(function(d){
-            if(!d.valid){
-                var c = document.querySelectorAll('.card');
-                if(c[0]) c[0].textContent = c[0].textContent.replace('\u2714', '').trim();
-                var h = document.querySelectorAll('.bot-controls, .stream-status, .stream-url, .screenshot-container');
-                for(var i=0;i<h.length;i++) if(h[i]) h[i].style.display = 'none';
-                var m = document.createElement('div');
-                m.style.cssText = 'color:#ff4444;z-index:2;position:relative;margin:20px;text-align:center;font-size:14px;';
-                m.textContent = '\u26a0\ufe0f انتهت صلاحية الجلسة، سجل الدخول مرة أخرى';
-                document.querySelector('.page-content').appendChild(m);
-            }
-        });
-        fetch("/check_session?site=youtube&token={{ token }}", {
-            headers: {"X-User-Agent": ua}
-        }).then(function(r){return r.json()}).then(function(d){
-            if(!d.valid){
-                var c = document.querySelectorAll('.card');
-                if(c[1]) c[1].textContent = c[1].textContent.replace('\u2714', '').trim();
-            }
-        });
-    })();
     </script>
 </body>
 </html>
