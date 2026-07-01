@@ -6,6 +6,12 @@ app = Flask(__name__)
 TOKEN = os.environ.get("TOKEN", "")
 
 latest_frame = None
+debug_log = []
+def _log(msg):
+    t = time.strftime("%H:%M:%S")
+    debug_log.append(f"[{t}] {msg}")
+    if len(debug_log) > 100:
+        debug_log.pop(0)
 
 VERSION = "0"
 try:
@@ -54,6 +60,7 @@ def set_cookies():
         path = os.path.expanduser(f"~/{site}_cookies.json")
         with open(path, "w") as f:
             json.dump(data, f, indent=2)
+        _log(f"Cookies saved: {site}")
         return jsonify({"status": "ok"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -63,6 +70,7 @@ def bot_start():
     data = request.get_json(force=True)
     user_agent = data.get("user_agent", "")
     started = selenium_bot.start_bot(user_agent)
+    _log(f"Bot start: {started}")
     sel_path = os.path.expanduser("~/sel_bot.json")
     with open(sel_path, "w") as f:
         json.dump({"start": started}, f)
@@ -71,6 +79,7 @@ def bot_start():
 @app.route("/bot/stop", methods=["POST"])
 def bot_stop():
     selenium_bot.stop_bot()
+    _log("Bot stop")
     sel_path = os.path.expanduser("~/sel_bot.json")
     with open(sel_path, "w") as f:
         json.dump({"start": False}, f)
@@ -85,6 +94,8 @@ def screenshot_aviso():
 
 def listen_udp():
     global latest_frame
+    _log("UDP listener started on port 9999")
+    frame_count = 0
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(('127.0.0.1', 9999))
     sock.settimeout(1)
@@ -100,6 +111,9 @@ def listen_udp():
                 buf += data
             if b'\xff\xd9' in buf:
                 latest_frame = buf[:buf.find(b'\xff\xd9')+2]
+                frame_count += 1
+                if frame_count % 30 == 1:
+                    _log(f"Frame #{frame_count} received")
                 buf = b''
         except socket.timeout:
             continue
@@ -119,6 +133,15 @@ def video_feed():
 @app.route("/stream_status")
 def stream_status():
     return jsonify({"active": latest_frame is not None})
+
+@app.route("/flask_debug")
+def flask_debug():
+    return jsonify({
+        "log": list(debug_log),
+        "active": latest_frame is not None,
+        "bot_running": selenium_bot.is_running(),
+        "stream_url": f"/video_feed?token={TOKEN}"
+    })
 
 if __name__ == "__main__":
     threading.Thread(target=listen_udp, daemon=True).start()
