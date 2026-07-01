@@ -31,7 +31,7 @@ def load_cookies(driver, filepath):
 
 def _start_xvfb():
     subprocess.run("Xvfb :99 -screen 0 405x720x24 &", shell=True)
-    time.sleep(1)
+    time.sleep(5)
 
 def _kill_all():
     subprocess.run("pkill -9 -f chromium; pkill -9 -f ffmpeg; pkill -9 -f Xvfb; rm -rf /tmp/.X*-lock /tmp/.X11-unix/X*", shell=True)
@@ -50,7 +50,7 @@ def _bot_worker(user_agent):
         if os.path.exists(cookie_path):
             load_cookies(driver, cookie_path)
             driver.get("https://aviso.bz")
-            time.sleep(3)
+            time.sleep(5)
         driver.save_screenshot(os.path.expanduser("~/aviso_screenshot.png"))
         ffmpeg_cmd = [
             'ffmpeg', '-y',
