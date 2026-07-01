@@ -1,6 +1,7 @@
 import os, socket, json, threading, time
 from flask import Flask, request, abort, render_template, jsonify, send_file, Response
 import selenium_bot
+import logging
 
 app = Flask(__name__)
 app.debug = True
@@ -21,6 +22,12 @@ try:
         VERSION = f.read().strip()
 except:
     pass
+
+class FlaskLogHandler(logging.Handler):
+    def emit(self, record):
+        _log(f"[Flask] {record.getMessage()}")
+
+logging.getLogger("werkzeug").addHandler(FlaskLogHandler())
 
 def get_port():
     try:
