@@ -6,6 +6,7 @@ app = Flask(__name__)
 TOKEN = os.environ.get("TOKEN", "")
 
 latest_frame = None
+frame_counter = 0
 debug_log = []
 def _log(msg):
     t = time.strftime("%H:%M:%S")
@@ -19,6 +20,13 @@ try:
         VERSION = f.read().strip()
 except:
     pass
+
+def get_port():
+    try:
+        with open(os.path.expanduser("~/flask.port")) as f:
+            return int(f.read().strip())
+    except:
+        return 5001
 
 @app.before_request
 def check_token():
@@ -93,9 +101,8 @@ def screenshot_aviso():
     return "", 404
 
 def listen_udp():
-    global latest_frame
+    global latest_frame, frame_counter
     _log("UDP listener started on port 9999")
-    frame_count = 0
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(('127.0.0.1', 9999))
     sock.settimeout(1)
@@ -111,9 +118,9 @@ def listen_udp():
                 buf += data
             if b'\xff\xd9' in buf:
                 latest_frame = buf[:buf.find(b'\xff\xd9')+2]
-                frame_count += 1
-                if frame_count % 30 == 1:
-                    _log(f"Frame #{frame_count} received")
+                frame_counter += 1
+                if frame_counter % 30 == 1:
+                    _log(f"Frame #{frame_counter} received")
                 buf = b''
         except socket.timeout:
             continue
@@ -136,12 +143,31 @@ def stream_status():
 
 @app.route("/flask_debug")
 def flask_debug():
+    port = get_port()
     return jsonify({
         "log": list(debug_log),
         "active": latest_frame is not None,
         "bot_running": selenium_bot.is_running(),
-        "stream_url": f"/video_feed?token={TOKEN}"
+        "frame_count": frame_counter,
+        "stream_url": f"http://127.0.0.1:{port}/video_feed?token={TOKEN}"
     })
+
+@app.route("/debug")
+def debug():
+    port = get_port()
+    stream_url = f"http://127.0.0.1:{port}/video_feed?token={TOKEN}"
+    aviso_done = os.path.exists(os.path.expanduser("~/aviso_cookies.json"))
+    yt_done = os.path.exists(os.path.expanduser("~/youtube_cookies.json"))
+    return render_template("debug.html",
+        stream_active=latest_frame is not None,
+        bot_running=selenium_bot.is_running(),
+        frame_count=frame_counter,
+        stream_url=stream_url,
+        aviso_done=aviso_done,
+        yt_done=yt_done,
+        log=list(debug_log),
+        version=VERSION,
+        token=TOKEN)
 
 if __name__ == "__main__":
     threading.Thread(target=listen_udp, daemon=True).start()
