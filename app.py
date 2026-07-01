@@ -29,7 +29,12 @@ def index():
 def aviso():
     aviso_done = os.path.exists(os.path.expanduser("~/aviso_cookies.json"))
     yt_done = os.path.exists(os.path.expanduser("~/youtube_cookies.json"))
-    bot_started = selenium_bot.is_running()
+    bot_started = False
+    sel_path = os.path.expanduser("~/sel_bot.json")
+    if os.path.exists(sel_path):
+        with open(sel_path) as f:
+            data = json.load(f)
+            bot_started = data.get("start", False)
     screenshot_exists = os.path.exists(os.path.expanduser("~/aviso_screenshot.png"))
     return render_template("aviso.html", version=VERSION,
                            aviso_done=aviso_done, yt_done=yt_done,
@@ -58,11 +63,17 @@ def bot_start():
     data = request.get_json(force=True)
     user_agent = data.get("user_agent", "")
     started = selenium_bot.start_bot(user_agent)
+    sel_path = os.path.expanduser("~/sel_bot.json")
+    with open(sel_path, "w") as f:
+        json.dump({"start": started}, f)
     return jsonify({"status": "ok" if started else "already_running"})
 
 @app.route("/bot/stop", methods=["POST"])
 def bot_stop():
     selenium_bot.stop_bot()
+    sel_path = os.path.expanduser("~/sel_bot.json")
+    with open(sel_path, "w") as f:
+        json.dump({"start": False}, f)
     return jsonify({"status": "ok"})
 
 @app.route("/screenshot/aviso")
