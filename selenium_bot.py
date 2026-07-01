@@ -30,7 +30,7 @@ def load_cookies(driver, filepath):
             pass
 
 def _start_xvfb():
-    subprocess.run("Xvfb :1 -screen 0 405x720x24 &", shell=True)
+    subprocess.run("Xvfb :99 -screen 0 405x720x24 &", shell=True)
     time.sleep(1)
 
 def _kill_all():
@@ -40,7 +40,7 @@ def _bot_worker(user_agent):
     global _driver, _ffmpeg_proc
     _kill_all()
     _start_xvfb()
-    os.environ["DISPLAY"] = ":1"
+    os.environ["DISPLAY"] = ":99"
     driver = create_driver(user_agent)
     with _driver_lock:
         _driver = driver
@@ -56,7 +56,7 @@ def _bot_worker(user_agent):
             'ffmpeg', '-y',
             '-f', 'x11grab',
             '-video_size', '405x720',
-            '-i', ':1',
+            '-i', ':99',
             '-f', 'image2',
             '-update', '1',
             '-vcodec', 'mjpeg',
