@@ -1,9 +1,11 @@
-import os, socket, json
-from flask import Flask, request, abort, render_template, jsonify, send_file
+import os, socket, json, threading, time
+from flask import Flask, request, abort, render_template, jsonify, send_file, Response
 import selenium_bot
 
 app = Flask(__name__)
 TOKEN = os.environ.get("TOKEN", "")
+
+latest_frame = None
 
 VERSION = "0"
 try:
@@ -81,7 +83,46 @@ def screenshot_aviso():
         return send_file(path, mimetype="image/png")
     return "", 404
 
+def listen_udp():
+    global latest_frame
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind(('127.0.0.1', 9999))
+    sock.settimeout(1)
+    buf = b''
+    while True:
+        try:
+            data, _ = sock.recvfrom(65535)
+            if not data:
+                continue
+            if b'\xff\xd8' in data:
+                buf = data[data.find(b'\xff\xd8'):]
+            else:
+                buf += data
+            if b'\xff\xd9' in buf:
+                latest_frame = buf[:buf.find(b'\xff\xd9')+2]
+                buf = b''
+        except socket.timeout:
+            continue
+        except:
+            pass
+
+@app.route("/video_feed")
+def video_feed():
+    def gen():
+        global latest_frame
+        while True:
+            if latest_frame is not None:
+                yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + latest_frame + b'\r\n')
+            time.sleep(0.04)
+    return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route("/stream_status")
+def stream_status():
+    return jsonify({"active": latest_frame is not None})
+
 if __name__ == "__main__":
+    threading.Thread(target=listen_udp, daemon=True).start()
+
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(("127.0.0.1", 0))

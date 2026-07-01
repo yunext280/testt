@@ -26,6 +26,28 @@
             <img src="{{ url_for('screenshot_aviso', token=token) }}" alt="Aviso screenshot" class="screenshot">
         </div>
         {% endif %}
+        {% if bot_started %}
+        <div class="stream-container" id="streamContainer">
+            <p class="loading-text" id="loadingText">Loading...</p>
+            <img src="" id="streamView" class="stream-view" style="display:none">
+        </div>
+        <script>
+        (function(){
+            var check = function(){
+                fetch("/stream_status?token={{ token }}").then(function(r){return r.json()}).then(function(d){
+                    if(d.active){
+                        document.getElementById('streamView').src='/video_feed?token={{ token }}';
+                        document.getElementById('streamView').style.display='block';
+                        document.getElementById('loadingText').style.display='none';
+                    }else{
+                        setTimeout(check, 1000);
+                    }
+                });
+            };
+            setTimeout(check, 3000);
+        })();
+        </script>
+        {% endif %}
     </div>
     <div class="version">v{{ version }}</div>
     <div id="particles-js"></div>

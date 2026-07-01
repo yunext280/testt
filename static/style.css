@@ -157,3 +157,25 @@ body, html {
     border-radius: 8px;
     box-shadow: 0 0 20px rgba(0, 238, 255, 0.1);
 }
+
+.stream-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    z-index: 2;
+    position: relative;
+}
+
+.loading-text {
+    color: rgba(255,255,255,0.5);
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+
+.stream-view {
+    max-width: 90%;
+    max-height: 50vh;
+    border: 1px solid rgba(0, 238, 255, 0.3);
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 238, 255, 0.1);
+}
