@@ -3,6 +3,7 @@ from flask import Flask, request, abort, render_template, jsonify, send_file, Re
 import selenium_bot
 
 app = Flask(__name__)
+app.debug = True
 TOKEN = os.environ.get("TOKEN", "")
 
 latest_frame = None
@@ -179,4 +180,4 @@ if __name__ == "__main__":
     sock.close()
     with open(os.path.expanduser("~/flask.port"), "w") as f:
         f.write(str(port))
-    app.run(host="127.0.0.1", port=port)
+    app.run(host="127.0.0.1", port=port, debug=True, use_reloader=False)
