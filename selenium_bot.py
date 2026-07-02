@@ -1,9 +1,15 @@
-import json, os, threading, time, subprocess
+import json
+import os
+import threading
+import time
+import subprocess
 
 _driver = None
 _driver_lock = threading.Lock()
 _stop_event = threading.Event()
 _ffmpeg_proc = None
+
+DISPLAY_NUM = ":99"
 
 def create_driver(user_agent=None):
     from selenium import webdriver
@@ -17,7 +23,7 @@ def create_driver(user_agent=None):
     if user_agent:
         options.add_argument(f"--user-agent={user_agent}")
     service = Service(executable_path="/usr/bin/chromedriver")
-    service.env = {"DISPLAY": ":99"}
+    service.env = {"DISPLAY": DISPLAY_NUM}
     return webdriver.Chrome(service=service, options=options)
 
 def load_cookies(driver, filepath):
@@ -30,21 +36,35 @@ def load_cookies(driver, filepath):
             pass
 
 def _start_xvfb():
-    subprocess.run("Xvfb :99 -screen 0 405x720x24 &", shell=True)
-    time.sleep(5)
+    print("🚀 جاري تشغيل Xvfb...")
+    subprocess.Popen(
+        ["sudo", "Xvfb", DISPLAY_NUM, "-screen", "0", "405x720x24"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+    time.sleep(3)
+    subprocess.run(["xhost", "+local:"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def _kill_all():
-    subprocess.run("pkill -9 -f chromium; pkill -9 -f ffmpeg; pkill -9 -f Xvfb; rm -rf /tmp/.X*-lock /tmp/.X11-unix/X*", shell=True)
+    print("🔄 جاري تنظيف العمليات القديمة وتهيئة البيئة...")
+    subprocess.run(["pkill", "-9", "-f", "chromium"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.run(["pkill", "-9", "-f", "ffmpeg"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.run(["sudo", "pkill", "-9", "-f", "Xvfb"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.run(["sudo", "rm", "-f", f"/tmp/.X{DISPLAY_NUM.replace(':', '')}-lock"])
+    subprocess.run(["sudo", "rm", "-rf", "/tmp/.X11-unix"])
+    subprocess.run(["sudo", "mkdir", "-p", "/tmp/.X11-unix"])
+    subprocess.run(["sudo", "chown", "root:root", "/tmp/.X11-unix"])
+    subprocess.run(["sudo", "chmod", "1777", "/tmp/.X11-unix"])
 
 def _bot_worker(user_agent):
     global _driver, _ffmpeg_proc
     _kill_all()
     _start_xvfb()
-    os.environ["DISPLAY"] = ":99"
-    driver = create_driver(user_agent)
-    with _driver_lock:
-        _driver = driver
+    os.environ["DISPLAY"] = DISPLAY_NUM
     try:
+        driver = create_driver(user_agent)
+        with _driver_lock:
+            _driver = driver
         driver.get("https://aviso.bz")
         cookie_path = os.path.expanduser("~/aviso_cookies.json")
         if os.path.exists(cookie_path):
@@ -56,7 +76,7 @@ def _bot_worker(user_agent):
             'ffmpeg', '-y',
             '-f', 'x11grab',
             '-video_size', '405x720',
-            '-i', ':99',
+            '-i', DISPLAY_NUM,
             '-f', 'image2',
             '-update', '1',
             '-vcodec', 'mjpeg',
@@ -65,14 +85,16 @@ def _bot_worker(user_agent):
         ]
         _ffmpeg_proc = subprocess.Popen(ffmpeg_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         _stop_event.wait()
-    except:
-        pass
+    except Exception as e:
+        print(f"⚠️ حدث خطأ أثناء تشغيل البوت: {e}")
     finally:
+        print("🛑 جاري إغلاق البوت وتنظيف الذاكرة...")
         if _ffmpeg_proc:
             _ffmpeg_proc.kill()
             _ffmpeg_proc = None
         try:
-            driver.quit()
+            if _driver:
+                _driver.quit()
         except:
             pass
         _kill_all()
