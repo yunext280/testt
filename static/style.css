@@ -148,7 +148,7 @@ body, html {
     margin: 20px auto;
     width: 90vw;
     max-width: 450px;
-    aspect-ratio: 9 / 16;
+    aspect-ratio: 16 / 9;
     z-index: 2;
     position: relative;
 }

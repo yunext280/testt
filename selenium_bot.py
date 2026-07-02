@@ -19,7 +19,7 @@ def create_driver(user_agent=None):
     options.binary_location = "/usr/bin/chromium"
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=405,720")
+    options.add_argument("--window-size=1280,720")
     if user_agent:
         options.add_argument(f"--user-agent={user_agent}")
     service = Service(executable_path="/usr/bin/chromedriver")
@@ -38,7 +38,7 @@ def load_cookies(driver, filepath):
 def _start_xvfb():
     print("🚀 جاري تشغيل Xvfb...")
     subprocess.Popen(
-        ["sudo", "Xvfb", DISPLAY_NUM, "-screen", "0", "405x720x24"],
+        ["sudo", "Xvfb", DISPLAY_NUM, "-screen", "0", "1280x720x24"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL
     )
@@ -75,7 +75,7 @@ def _bot_worker(user_agent):
         ffmpeg_cmd = [
             'ffmpeg', '-y',
             '-f', 'x11grab',
-            '-video_size', '405x720',
+            '-video_size', '1280x720',
             '-i', DISPLAY_NUM,
             '-f', 'image2',
             '-update', '1',
