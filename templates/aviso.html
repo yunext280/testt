@@ -27,10 +27,7 @@
             <button id="btnStart" class="bot-btn" onclick="botStart()" {% if bot_started %}disabled{% endif %}>Start</button>
             <button id="btnStop" class="bot-btn" onclick="botStop()" {% if not bot_started %}disabled{% endif %}>Stop</button>
         </div>
-        {% endif %}
-        {% if screenshot_exists %}
         <div class="screenshot-container">
-
             <img id="streamView" class="stream-view" style="display:none" alt="البث الحي للمتصفح">
         </div>
         <script>

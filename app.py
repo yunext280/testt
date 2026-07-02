@@ -35,11 +35,9 @@ def aviso():
         with open(sel_path) as f:
             data = json.load(f)
             bot_started = data.get("start", False)
-    screenshot_exists = os.path.exists(os.path.expanduser("~/aviso_screenshot.png"))
     return render_template("aviso.html", version=VERSION,
                            aviso_done=aviso_done, yt_done=yt_done,
                            bot_started=bot_started,
-                           screenshot_exists=screenshot_exists,
                            token=TOKEN)
 
 @app.route("/seotime")
