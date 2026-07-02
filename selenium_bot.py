@@ -32,8 +32,8 @@ def load_cookies(driver, filepath):
     for cookie in cookies:
         try:
             driver.add_cookie(cookie)
-        except:
-            pass
+        except Exception as e:
+            print(f"Cookie add failed: {cookie.get('name')}: {e}")
 
 def _start_xvfb():
     print("🚀 جاري تشغيل Xvfb...")
