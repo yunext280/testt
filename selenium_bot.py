@@ -5,6 +5,7 @@ import time
 import subprocess
 
 _driver = None
+_starting = False
 _driver_lock = threading.Lock()
 _stop_event = threading.Event()
 _ffmpeg_proc = None
@@ -61,6 +62,18 @@ def _bot_worker(user_agent):
     _kill_all()
     _start_xvfb()
     os.environ["DISPLAY"] = DISPLAY_NUM
+    ffmpeg_cmd = [
+        'ffmpeg', '-y',
+        '-f', 'x11grab',
+        '-video_size', '1280x720',
+        '-i', DISPLAY_NUM,
+        '-f', 'image2',
+        '-update', '1',
+        '-vcodec', 'mjpeg',
+        '-q:v', '5',
+        'udp://127.0.0.1:9999?pkt_size=60000'
+    ]
+    _ffmpeg_proc = subprocess.Popen(ffmpeg_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
         driver = create_driver(user_agent)
         with _driver_lock:
@@ -72,18 +85,6 @@ def _bot_worker(user_agent):
             driver.get("https://aviso.bz")
             time.sleep(5)
         driver.save_screenshot(os.path.expanduser("~/aviso_screenshot.png"))
-        ffmpeg_cmd = [
-            'ffmpeg', '-y',
-            '-f', 'x11grab',
-            '-video_size', '1280x720',
-            '-i', DISPLAY_NUM,
-            '-f', 'image2',
-            '-update', '1',
-            '-vcodec', 'mjpeg',
-            '-q:v', '5',
-            'udp://127.0.0.1:9999?pkt_size=60000'
-        ]
-        _ffmpeg_proc = subprocess.Popen(ffmpeg_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         _stop_event.wait()
     except Exception as e:
         print(f"⚠️ حدث خطأ أثناء تشغيل البوت: {e}")
@@ -100,11 +101,13 @@ def _bot_worker(user_agent):
         _kill_all()
         with _driver_lock:
             _driver = None
+            _starting = False
 
 def start_bot(user_agent=None):
     with _driver_lock:
         if _driver is not None:
             return False
+        _starting = True
         _stop_event.clear()
     thread = threading.Thread(target=_bot_worker, args=(user_agent,), daemon=True)
     thread.start()
@@ -116,4 +119,4 @@ def stop_bot():
 
 def is_running():
     with _driver_lock:
-        return _driver is not None
+        return _starting or _driver is not None
