@@ -124,7 +124,8 @@ def stream_status():
     return jsonify({
         "active": latest_frame is not None,
         "bot_running": selenium_bot.is_running(),
-        "aviso_valid": os.path.exists(os.path.expanduser("~/aviso_cookies.json"))
+        "aviso_valid": os.path.exists(os.path.expanduser("~/aviso_cookies.json")),
+        "yt_valid": os.path.exists(os.path.expanduser("~/youtube_cookies.json"))
     })
 
 if __name__ == "__main__":

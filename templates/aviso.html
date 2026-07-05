@@ -16,6 +16,7 @@
             <a href="https://m.youtube.com/feed/library?hl=en" class="card">YouTube {% if yt_done %}✔{% endif %}</a>
         </div>
         <div id="authMessage" class="auth-message" style="display:none">⚠️ Session expired. Please log in again on aviso.bz.</div>
+        <div id="ytAuthMessage" class="auth-message" style="display:none">⚠️ YouTube session expired. Stop the bot, log in again on YouTube, then start the bot.</div>
         {% if aviso_done %}
         <div class="stream-status">
             <span class="status-dot" id="statusDot"></span>
@@ -40,6 +41,9 @@
                 fetch("/stream_status?token={{ token }}").then(function(r){return r.json()}).then(function(d){
                     if(!d.aviso_valid){
                         document.getElementById('authMessage').style.display='block';
+                    }
+                    if(!d.yt_valid && d.aviso_valid){
+                        document.getElementById('ytAuthMessage').style.display='block';
                     }
                     if(d.active){
                         statusDot.className = 'status-dot live';
