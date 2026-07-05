@@ -121,7 +121,11 @@ def video_feed():
 
 @app.route("/stream_status")
 def stream_status():
-    return jsonify({"active": latest_frame is not None, "bot_running": selenium_bot.is_running()})
+    return jsonify({
+        "active": latest_frame is not None,
+        "bot_running": selenium_bot.is_running(),
+        "aviso_valid": os.path.exists(os.path.expanduser("~/aviso_cookies.json"))
+    })
 
 if __name__ == "__main__":
     threading.Thread(target=listen_udp, daemon=True).start()

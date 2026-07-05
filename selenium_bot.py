@@ -39,6 +39,7 @@ def load_cookies(driver, filepath):
 
 
 def _bot_worker(user_agent):
+    from aviso_bot import login_aviso
     global _driver, _ffmpeg_proc
     _kill_all()
     _start_xvfb()
@@ -48,12 +49,8 @@ def _bot_worker(user_agent):
         driver = create_driver(user_agent)
         with _driver_lock:
             _driver = driver
-        driver.get("https://aviso.bz")
-        cookie_path = os.path.expanduser("~/aviso_cookies.json")
-        if os.path.exists(cookie_path):
-            load_cookies(driver, cookie_path)
-            driver.get("https://aviso.bz")
-            time.sleep(5)
+        if not login_aviso(driver):
+            return
         driver.save_screenshot(os.path.expanduser("~/aviso_screenshot.png"))
         _stop_event.wait()
     except Exception as e:

@@ -15,6 +15,7 @@
             <a href="https://aviso.bz/login" class="card">aviso.bz {% if aviso_done %}✔{% endif %}</a>
             <a href="https://m.youtube.com/feed/library?hl=en" class="card">YouTube {% if yt_done %}✔{% endif %}</a>
         </div>
+        <div id="authMessage" class="auth-message" style="display:none">⚠️ Session expired. Please log in again on aviso.bz.</div>
         {% if aviso_done %}
         <div class="stream-status">
             <span class="status-dot" id="statusDot"></span>
@@ -37,6 +38,9 @@
             var streamUrl = document.getElementById('streamUrl');
             setInterval(function(){
                 fetch("/stream_status?token={{ token }}").then(function(r){return r.json()}).then(function(d){
+                    if(!d.aviso_valid){
+                        document.getElementById('authMessage').style.display='block';
+                    }
                     if(d.active){
                         statusDot.className = 'status-dot live';
                         statusText.textContent = 'Live';
