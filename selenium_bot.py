@@ -50,11 +50,11 @@ def _bot_worker(user_agent):
         with _driver_lock:
             _driver = driver
         if login_aviso(driver):
-            pass
-        else:
-            return
-        if check_sub(driver):
-            pass
+            cheker = check_sub(driver)
+            if cheker:
+                pass
+            else:
+                pass
         else:
             return
         driver.save_screenshot(os.path.expanduser("~/aviso_screenshot.png"))
