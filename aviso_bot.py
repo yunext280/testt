@@ -12,8 +12,8 @@ def login_aviso(driver):
     if os.path.exists(cookie_path):
         load_cookies(driver, cookie_path)
         driver.get("https://aviso.bz/members")
-        time.sleep(5)
-        if driver.current_url == 'https://aviso.bz/login':
+        time.sleep(8)
+        if "/login" in driver.current_url:
             os.remove(cookie_path)
             stop_bot()
             return False
