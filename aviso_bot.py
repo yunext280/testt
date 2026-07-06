@@ -22,10 +22,10 @@ def login_aviso(driver):
 
 
 def check_yt(driver):
-    driver.get("https://www.youtube.com/feed/library")
     cookie_path = os.path.expanduser("~/youtube_cookies.json")
     if not os.path.exists(cookie_path):
         return False
+    driver.get("https://www.youtube.com/feed/library")
     load_cookies(driver, cookie_path)
     driver.refresh()
     time.sleep(5)
