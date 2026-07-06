@@ -16,11 +16,31 @@ def create_driver(user_agent=None):
     from selenium.webdriver.chrome.options import Options
     options = Options()
     options.binary_location = "/usr/bin/chromium"
+
+    prefs = {"profile.default_content_setting_values.notifications": 2}
+    options.add_experimental_option("prefs", prefs)
+    options.add_argument("--lang=en")
+    options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    options.add_argument('--ignore-certificate-errors-spki-list')
+    options.add_argument('--ignore-certificate-errors')
+    options.add_argument('--ignore-ssl-errors')
+    options.add_experimental_option("detach", True)
+    options.add_experimental_option("useAutomationExtension", False)
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_argument("disable-blink-features")
+    options.add_argument('--disable-blink-features=AutomationControlled')
+    options.add_argument('--disable-gpu')
+    options.add_argument("--log-level=3")
+    options.add_experimental_option('w3c', True)
+    options.add_argument("--disable-web-security")
+    options.add_argument("--allow-running-insecure-content")
+    options.add_argument('--disable-logging')
+    options.add_argument("--mute-audio")
     options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1280,720")
+    options.add_argument('--window-size=1280,720')
     if user_agent:
         options.add_argument(f"--user-agent={user_agent}")
+
     service = Service(executable_path="/usr/bin/chromedriver")
     service.env = {"DISPLAY": DISPLAY_NUM}
     return webdriver.Chrome(service=service, options=options)
