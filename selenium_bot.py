@@ -9,6 +9,7 @@ _starting = False
 _driver_lock = threading.Lock()
 _stop_event = threading.Event()
 _ffmpeg_proc = None
+_bot_thread = None
 
 def create_driver(user_agent=None):
     from selenium import webdriver
@@ -60,7 +61,7 @@ def load_cookies(driver, filepath):
 
 def _bot_worker(user_agent):
     from aviso_bot import login_aviso, check_sub
-    global _driver, _ffmpeg_proc
+    global _driver, _ffmpeg_proc, _bot_thread
     try:
         _kill_all()
         _start_xvfb()
@@ -95,8 +96,10 @@ def _bot_worker(user_agent):
         with _driver_lock:
             _driver = None
             _starting = False
+        _bot_thread = None
 
 def start_bot(user_agent=None):
+    global _bot_thread
     with _driver_lock:
         if _driver is not None:
             return False
@@ -104,11 +107,15 @@ def start_bot(user_agent=None):
         _stop_event.clear()
     thread = threading.Thread(target=_bot_worker, args=(user_agent,), daemon=True)
     thread.start()
+    _bot_thread = thread
     return True
 
 def stop_bot():
+    global _bot_thread
     _stop_event.set()
-    return True
+    if _bot_thread is not None:
+        _bot_thread.join(timeout=10)
+        _bot_thread = None
 
 def is_running():
     with _driver_lock:
