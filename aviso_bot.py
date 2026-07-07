@@ -43,7 +43,7 @@ def check_yt(driver):
 
 def check_sub(driver):
     if check_yt(driver):
-        driver.get("https://www.youtube.com/@mmrid07?hl=en")
+        driver.get("https://www.youtube.com/@only_with_bot?hl=en")
         time.sleep(5)
         subb = WebDriverWait(driver, 30).until(
             EC.visibility_of_element_located((By.CLASS_NAME, "ytSpecButtonShapeNextButtonTextContent"))
