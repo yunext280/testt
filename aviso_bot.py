@@ -52,5 +52,6 @@ def check_sub(driver):
             return True
         else:
             subb.click()
+            return True
     else:
         return False

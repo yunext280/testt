@@ -37,14 +37,19 @@
             var statusDot = document.getElementById('statusDot');
             var statusText = document.getElementById('statusText');
             var streamUrl = document.getElementById('streamUrl');
+            var authMsg = document.getElementById('authMessage');
+            var ytAuthMsg = document.getElementById('ytAuthMessage');
             setInterval(function(){
                 fetch("/stream_status?token={{ token }}").then(function(r){return r.json()}).then(function(d){
                     if(!d.aviso_valid){
-                        location.reload();
+                        authMsg.style.display = 'block';
+                        ytAuthMsg.style.display = 'none';
+                        statusDot.className = 'status-dot offline';
+                        statusText.textContent = 'Offline';
+                        return;
                     }
-                    if(!d.yt_valid && d.aviso_valid){
-                        location.reload();
-                    }
+                    authMsg.style.display = 'none';
+                    ytAuthMsg.style.display = d.yt_valid ? 'none' : 'block';
                     if(d.active){
                         statusDot.className = 'status-dot live';
                         statusText.textContent = 'Live';
