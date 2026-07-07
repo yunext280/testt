@@ -40,7 +40,7 @@
             setInterval(function(){
                 fetch("/stream_status?token={{ token }}").then(function(r){return r.json()}).then(function(d){
                     if(!d.aviso_valid){
-                        document.getElementById('authMessage').style.display='block';
+                        location.reload();
                     }
                     if(!d.yt_valid && d.aviso_valid){
                         document.getElementById('ytAuthMessage').style.display='block';
