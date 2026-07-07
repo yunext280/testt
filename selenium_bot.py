@@ -61,11 +61,11 @@ def load_cookies(driver, filepath):
 def _bot_worker(user_agent):
     from aviso_bot import login_aviso, check_sub
     global _driver, _ffmpeg_proc
-    _kill_all()
-    _start_xvfb()
-    os.environ["DISPLAY"] = DISPLAY_NUM
-    _ffmpeg_proc = start_ffmpeg()
     try:
+        _kill_all()
+        _start_xvfb()
+        os.environ["DISPLAY"] = DISPLAY_NUM
+        _ffmpeg_proc = start_ffmpeg()
         driver = create_driver(user_agent)
         with _driver_lock:
             _driver = driver
