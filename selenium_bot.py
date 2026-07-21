@@ -61,7 +61,7 @@ def load_cookies(driver, filepath):
 
 def _bot_worker(user_agent):
     from aviso_bot import login_aviso, check_sub
-    global _driver, _ffmpeg_proc, _bot_thread
+    global _driver, _ffmpeg_proc, _bot_thread, _starting
     try:
         _kill_all()
         _start_xvfb()
