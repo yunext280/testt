@@ -44,6 +44,15 @@ def aviso():
 def seotime():
     return render_template("seotime.html", version=VERSION)
 
+@app.route("/set_user_agent", methods=["POST"])
+def set_user_agent():
+    data = request.get_json(force=True)
+    ua = data.get("user_agent", "")
+    if ua:
+        with open(os.path.expanduser("~/user_agent.json"), "w") as f:
+            json.dump({"user_agent": ua}, f)
+    return jsonify({"status": "ok"})
+
 @app.route("/set_cookies", methods=["POST"])
 def set_cookies():
     site = request.args.get("site", "unknown")

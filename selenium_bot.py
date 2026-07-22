@@ -100,6 +100,11 @@ def _bot_worker(user_agent):
 
 def start_bot(user_agent=None):
     global _bot_thread
+    if not user_agent:
+        ua_path = os.path.expanduser("~/user_agent.json")
+        if os.path.exists(ua_path):
+            with open(ua_path) as f:
+                user_agent = json.load(f).get("user_agent", "")
     with _driver_lock:
         if _driver is not None:
             return False
