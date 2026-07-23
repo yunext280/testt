@@ -19,9 +19,6 @@
             <span class="status-dot" id="statusDot"></span>
             <span id="statusText">Offline</span>
         </div>
-        <div class="stream-url" id="streamUrl" style="display:none;">
-            <a href="/video_feed?token={{ token }}" target="_blank">Stream URL</a>
-        </div>
         <div class="bot-controls">
             <button id="btnStart" class="bot-btn" onclick="botStart()" {% if bot_started %}disabled{% endif %}>Start</button>
             <button id="btnStop" class="bot-btn" onclick="botStop()" {% if not bot_started %}disabled{% endif %}>Stop</button>
@@ -33,7 +30,6 @@
         (function(){
             var statusDot = document.getElementById('statusDot');
             var statusText = document.getElementById('statusText');
-            var streamUrl = document.getElementById('streamUrl');
             var authMsg = document.getElementById('authMessage');
             var ytAuthMsg = document.getElementById('ytAuthMessage');
             setInterval(function(){
@@ -52,7 +48,6 @@
                         statusText.textContent = 'Live';
                         document.getElementById('streamView').src='/video_feed?token={{ token }}';
                         document.getElementById('streamView').style.display='block';
-                        if(streamUrl) streamUrl.style.display='block';
                     } else if(d.bot_running){
                         statusDot.className = 'status-dot connecting';
                         statusText.textContent = 'Connecting...';
