@@ -55,6 +55,14 @@ def load_cookies(driver, filepath):
         except Exception as e:
             print(f"Cookie add failed: {cookie.get('name')}: {e}")
 
+def wait_for_ad_watched():
+    path = os.path.expanduser("~/ad_watched.json")
+    while True:
+        if os.path.exists(path):
+            os.remove(path)
+            return True
+        time.sleep(2)
+
 
 
 
@@ -71,6 +79,7 @@ def _bot_worker(user_agent):
         with _driver_lock:
             _driver = driver
         if login_aviso(driver):
+            wait_for_ad_watched()
             cheker = check_sub(driver)
             if cheker:
                 pass

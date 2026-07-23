@@ -88,6 +88,13 @@ def bot_stop():
         os.remove(ss_path)
     return jsonify({"status": "ok"})
 
+@app.route("/bot/ad_watched", methods=["POST"])
+def bot_ad_watched():
+    path = os.path.expanduser("~/ad_watched.json")
+    with open(path, "w") as f:
+        json.dump({"watched": True, "time": time.time()}, f)
+    return jsonify({"status": "ok"})
+
 @app.route("/screenshot/aviso")
 def screenshot_aviso():
     path = os.path.expanduser("~/aviso_screenshot.png")
