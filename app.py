@@ -6,6 +6,7 @@ app = Flask(__name__)
 TOKEN = os.environ.get("TOKEN", "")
 
 latest_frame = None
+ad_pending = False
 
 VERSION = "0"
 try:
@@ -90,9 +91,17 @@ def bot_stop():
 
 @app.route("/bot/ad_watched", methods=["POST"])
 def bot_ad_watched():
+    global ad_pending
+    ad_pending = False
     path = os.path.expanduser("~/ad_watched.json")
     with open(path, "w") as f:
         json.dump({"watched": True, "time": time.time()}, f)
+    return jsonify({"status": "ok"})
+
+@app.route("/bot/ad_ready", methods=["POST"])
+def bot_ad_ready():
+    global ad_pending
+    ad_pending = True
     return jsonify({"status": "ok"})
 
 @app.route("/screenshot/aviso")
@@ -141,7 +150,8 @@ def stream_status():
         "active": latest_frame is not None,
         "bot_running": selenium_bot.is_running(),
         "aviso_valid": os.path.exists(os.path.expanduser("~/aviso_cookies.json")),
-        "yt_valid": os.path.exists(os.path.expanduser("~/youtube_cookies.json"))
+        "yt_valid": os.path.exists(os.path.expanduser("~/youtube_cookies.json")),
+        "ad_pending": ad_pending
     })
 
 if __name__ == "__main__":

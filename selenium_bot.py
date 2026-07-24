@@ -2,6 +2,7 @@ import json
 import os
 import threading
 import time
+import urllib.request
 from xvfb_manager import _start_xvfb, _kill_all, start_ffmpeg, DISPLAY_NUM
 
 _driver = None
@@ -63,6 +64,23 @@ def wait_for_ad_watched():
             return True
         time.sleep(2)
 
+def notify_ad_ready():
+    try:
+        port_path = os.path.expanduser("~/flask.port")
+        token_path = os.path.expanduser("~/flask.token")
+        if not os.path.exists(port_path):
+            return
+        port = open(port_path).read().strip()
+        token = ""
+        if os.path.exists(token_path):
+            token = open(token_path).read().strip()
+        url = f"http://127.0.0.1:{port}/bot/ad_ready?token={token}"
+        req = urllib.request.Request(url, data=b'{}', method='POST')
+        req.add_header('Content-Type', 'application/json')
+        urllib.request.urlopen(req, timeout=5)
+    except Exception as e:
+        print(f"notify_ad_ready failed: {e}")
+
 
 
 
@@ -79,6 +97,7 @@ def _bot_worker(user_agent):
         with _driver_lock:
             _driver = driver
         if login_aviso(driver):
+            notify_ad_ready()
             wait_for_ad_watched()
             cheker = check_sub(driver)
             if cheker:
