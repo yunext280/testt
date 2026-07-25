@@ -55,6 +55,8 @@
                         statusDot.className = 'status-dot offline';
                         statusText.textContent = 'Offline';
                     }
+                    document.getElementById('btnStart').disabled = d.bot_running;
+                    document.getElementById('btnStop').disabled = !d.bot_running;
                 }).catch(function(){});
             }, 2000);
         })();
