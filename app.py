@@ -68,6 +68,11 @@ def set_cookies():
 
 @app.route("/bot/start", methods=["POST"])
 def bot_start():
+    global ad_pending
+    ad_path = os.path.expanduser("~/ad_watched.json")
+    if os.path.exists(ad_path):
+        os.remove(ad_path)
+    ad_pending = False
     data = request.get_json(force=True)
     user_agent = data.get("user_agent", "")
     started = selenium_bot.start_bot(user_agent)
