@@ -83,7 +83,8 @@ def bot_start():
 
 @app.route("/bot/stop", methods=["POST"])
 def bot_stop():
-    global latest_frame
+    global latest_frame, ad_pending
+    ad_pending = False
     selenium_bot.stop_bot()
     sel_path = os.path.expanduser("~/sel_bot.json")
     with open(sel_path, "w") as f:
