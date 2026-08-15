@@ -21,37 +21,37 @@ def login_aviso(driver):
     return False
 
 
-def check_yt(driver):
-    cookie_path = os.path.expanduser("~/youtube_cookies.json")
-    if not os.path.exists(cookie_path):
-        return False
-    driver.get("https://www.youtube.com/feed/library")
-    load_cookies(driver, cookie_path)
-    driver.refresh()
-    time.sleep(5)
-    try:
-        WebDriverWait(driver, 30).until(
-            EC.visibility_of_any_elements_located(
-                (By.CSS_SELECTOR, ".ytSpecButtonShapeNextHost.ytSpecButtonShapeNextOutline.ytSpecButtonShapeNextCallToAction.ytSpecButtonShapeNextSizeM.ytSpecButtonShapeNextIconLeading.ytSpecButtonShapeNextEnableBackdropFilterExperiment")
-            )
-        )
-        os.remove(cookie_path)
-        return False
-    except:
-        return True
+# def check_yt(driver):
+#     cookie_path = os.path.expanduser("~/youtube_cookies.json")
+#     if not os.path.exists(cookie_path):
+#         return False
+#     driver.get("https://www.youtube.com/feed/library")
+#     load_cookies(driver, cookie_path)
+#     driver.refresh()
+#     time.sleep(5)
+#     try:
+#         WebDriverWait(driver, 30).until(
+#             EC.visibility_of_any_elements_located(
+#                 (By.CSS_SELECTOR, ".ytSpecButtonShapeNextHost.ytSpecButtonShapeNextOutline.ytSpecButtonShapeNextCallToAction.ytSpecButtonShapeNextSizeM.ytSpecButtonShapeNextIconLeading.ytSpecButtonShapeNextEnableBackdropFilterExperiment")
+#             )
+#         )
+#         os.remove(cookie_path)
+#         return False
+#     except:
+#         return True
 
 
-def check_sub(driver):
-    if check_yt(driver):
-        driver.get("https://www.youtube.com/@only_with_bot?hl=en")
-        time.sleep(5)
-        subb = WebDriverWait(driver, 30).until(
-            EC.visibility_of_element_located((By.CLASS_NAME, "ytSpecButtonShapeNextButtonTextContent"))
-        )
-        if subb.text.lower() == "subscribed":
-            return True
-        else:
-            subb.click()
-            return True
-    else:
-        return False
+# def check_sub(driver):
+#     if check_yt(driver):
+#         driver.get("https://www.youtube.com/@only_with_bot?hl=en")
+#         time.sleep(5)
+#         subb = WebDriverWait(driver, 30).until(
+#             EC.visibility_of_element_located((By.CLASS_NAME, "ytSpecButtonShapeNextButtonTextContent"))
+#         )
+#         if subb.text.lower() == "subscribed":
+#             return True
+#         else:
+#             subb.click()
+#             return True
+#     else:
+#         return False

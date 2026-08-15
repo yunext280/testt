@@ -86,7 +86,7 @@ def notify_ad_ready():
 
 
 def _bot_worker(user_agent):
-    from aviso_bot import login_aviso, check_sub
+    from aviso_bot import login_aviso  # , check_sub
     global _driver, _ffmpeg_proc, _bot_thread, _starting
     try:
         _kill_all()
@@ -99,11 +99,11 @@ def _bot_worker(user_agent):
         if login_aviso(driver):
             notify_ad_ready()
             wait_for_ad_watched()
-            cheker = check_sub(driver)
-            if cheker:
-                pass
-            else:
-                pass
+            # cheker = check_sub(driver)
+            # if cheker:
+            #     pass
+            # else:
+            #     pass
         else:
             return
         driver.save_screenshot(os.path.expanduser("~/aviso_screenshot.png"))

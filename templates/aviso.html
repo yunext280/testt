@@ -10,10 +10,10 @@
     <div class="page-content">
         <div class="cards-container">
             <a href="https://aviso.bz/login" class="card">aviso.bz {% if aviso_done %}✔{% endif %}</a>
-            <a href="https://m.youtube.com/feed/library?hl=en" class="card">YouTube {% if yt_done %}✔{% endif %}</a>
+            <!-- <a href="https://m.youtube.com/feed/library?hl=en" class="card">YouTube {% if yt_done %}✔{% endif %}</a> -->
         </div>
         <div id="authMessage" class="auth-message" style="display:none">⚠️ Please log in to aviso.bz</div>
-        <div id="ytAuthMessage" class="auth-message" style="display:none">⚠️ Stop the bot, please log in to YouTube to complete YouTube tasks if you want. Then start the bot.</div>
+        <!-- <div id="ytAuthMessage" class="auth-message" style="display:none">⚠️ Stop the bot, please log in to YouTube to complete YouTube tasks if you want. Then start the bot.</div> -->
         {% if aviso_done %}
         <div class="stream-status">
             <span class="status-dot" id="statusDot"></span>
@@ -31,18 +31,18 @@
             var statusDot = document.getElementById('statusDot');
             var statusText = document.getElementById('statusText');
             var authMsg = document.getElementById('authMessage');
-            var ytAuthMsg = document.getElementById('ytAuthMessage');
+            // var ytAuthMsg = document.getElementById('ytAuthMessage');
             setInterval(function(){
                 fetch("/stream_status?token={{ token }}").then(function(r){return r.json()}).then(function(d){
                     if(!d.aviso_valid){
                         authMsg.style.display = 'block';
-                        ytAuthMsg.style.display = 'none';
+                        // ytAuthMsg.style.display = 'none';
                         statusDot.className = 'status-dot offline';
                         statusText.textContent = 'Offline';
                         return;
                     }
                     authMsg.style.display = 'none';
-                    ytAuthMsg.style.display = d.yt_valid ? 'none' : 'block';
+                    // ytAuthMsg.style.display = d.yt_valid ? 'none' : 'block';
                     if(d.active){
                         statusDot.className = 'status-dot live';
                         statusText.textContent = 'Live';

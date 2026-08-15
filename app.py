@@ -29,7 +29,7 @@ def index():
 @app.route("/aviso")
 def aviso():
     aviso_done = os.path.exists(os.path.expanduser("~/aviso_cookies.json"))
-    yt_done = os.path.exists(os.path.expanduser("~/youtube_cookies.json"))
+    # yt_done = os.path.exists(os.path.expanduser("~/youtube_cookies.json"))
     bot_started = False
     sel_path = os.path.expanduser("~/sel_bot.json")
     if os.path.exists(sel_path):
@@ -37,7 +37,7 @@ def aviso():
             data = json.load(f)
             bot_started = data.get("start", False)
     return render_template("aviso.html", version=VERSION,
-                           aviso_done=aviso_done, yt_done=yt_done,
+                           aviso_done=aviso_done,  # yt_done=yt_done,
                            bot_started=bot_started,
                            token=TOKEN)
 
@@ -155,7 +155,7 @@ def stream_status():
         "active": latest_frame is not None,
         "bot_running": selenium_bot.is_running(),
         "aviso_valid": os.path.exists(os.path.expanduser("~/aviso_cookies.json")),
-        "yt_valid": os.path.exists(os.path.expanduser("~/youtube_cookies.json")),
+        # "yt_valid": os.path.exists(os.path.expanduser("~/youtube_cookies.json")),
         "ad_pending": ad_pending
     })
 
