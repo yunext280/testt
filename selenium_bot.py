@@ -43,6 +43,12 @@ def create_driver(user_agent=None):
     if user_agent:
         options.add_argument(f"--user-agent={user_agent}")
 
+    crx_path = os.path.expanduser("~/NopeCHA.crx")
+    if os.path.exists(crx_path):
+        options.add_extension(crx_path)
+    else:
+        print(f"NopeCHA.crx not found at {crx_path}")
+
     service = Service(executable_path="/usr/bin/chromedriver")
     service.env = {"DISPLAY": DISPLAY_NUM}
     return webdriver.Chrome(service=service, options=options)
