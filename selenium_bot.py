@@ -68,6 +68,13 @@ def load_cookies(driver, filepath):
 def should_stop():
     return _stop_event.is_set()
 
+def interruptible_sleep(seconds):
+    end = time.time() + seconds
+    while time.time() < end:
+        if _stop_event.is_set():
+            return
+        time.sleep(min(0.5, end - time.time()))
+
 def wait_for_ad_watched():
     path = os.path.expanduser("~/ad_watched.json")
     while not _stop_event.is_set():

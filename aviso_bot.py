@@ -4,7 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium_bot import load_cookies, should_stop, stop_bot, close_tap
+from selenium_bot import load_cookies, should_stop, stop_bot, close_tap, interruptible_sleep
 
 
 def login_aviso(driver):
@@ -44,18 +44,18 @@ def scrol_Surfing(driver:webdriver,second:int,ads:object) -> None:
         serf= ser.replace('serf-link-','start-serf-')
         try:
             WebDriverWait(driver, second).until(EC.element_to_be_clickable((By.XPATH,f'//*[@id="{serf}"]/a'))).click()
-            time.sleep(second//6)
+            interruptible_sleep(second//6)
             if len(driver.window_handles)>1:
                 driver.switch_to.window(driver.window_handles[1])
-                time.sleep(second//6)
-                time.sleep(sek+5)
+                interruptible_sleep(second//6)
+                interruptible_sleep(sek+5)
                 driver.switch_to.window(driver.window_handles[0])
                 confer=ser.replace('serf-link-','serf_btn_confirm_')
-                time.sleep(second//10)
+                interruptible_sleep(second//10)
                 WebDriverWait(driver, second).until(EC.element_to_be_clickable((By.ID,confer))).click()
-                time.sleep(second//10)
+                interruptible_sleep(second//10)
                 close_tap(driver)
-                time.sleep(second//10)
+                interruptible_sleep(second//10)
         except:
             WebDriverWait(driver, second).until(EC.visibility_of_element_located((By.CSS_SELECTOR,f'.h-captcha')))
     except:
