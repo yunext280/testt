@@ -152,7 +152,7 @@ def video_feed():
 @app.route("/stream_status")
 def stream_status():
     return jsonify({
-        "active": latest_frame is not None,
+        "active": latest_frame is not None and selenium_bot.is_running(),
         "bot_running": selenium_bot.is_running(),
         "aviso_valid": os.path.exists(os.path.expanduser("~/aviso_cookies.json")),
         # "yt_valid": os.path.exists(os.path.expanduser("~/youtube_cookies.json")),

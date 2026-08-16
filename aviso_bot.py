@@ -15,6 +15,9 @@ def login_aviso(driver):
         time.sleep(8)
         if "/login" in driver.current_url:
             os.remove(cookie_path)
+            sel_path = os.path.expanduser("~/sel_bot.json")
+            if os.path.exists(sel_path):
+                os.remove(sel_path)
             stop_bot()
             return False
         return True

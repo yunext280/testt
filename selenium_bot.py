@@ -152,9 +152,9 @@ def start_bot(user_agent=None):
 def stop_bot():
     global _bot_thread
     _stop_event.set()
-    if _bot_thread is not None:
+    if _bot_thread is not None and _bot_thread is not threading.current_thread():
         _bot_thread.join(timeout=10)
-        _bot_thread = None
+    _bot_thread = None
 
 def is_running():
     with _driver_lock:
