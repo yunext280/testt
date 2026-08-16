@@ -187,6 +187,7 @@ def start_bot(user_agent=None):
 def stop_bot():
     global _bot_thread
     _stop_event.set()
+    _kill_all()
     if _bot_thread is not None and _bot_thread is not threading.current_thread():
         _bot_thread.join(timeout=10)
     _bot_thread = None
