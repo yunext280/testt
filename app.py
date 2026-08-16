@@ -70,8 +70,10 @@ def set_cookies():
 def bot_start():
     global ad_pending
     ad_path = os.path.expanduser("~/ad_watched.json")
-    if os.path.exists(ad_path):
+    try:
         os.remove(ad_path)
+    except OSError:
+        pass
     ad_pending = False
     data = request.get_json(force=True)
     user_agent = data.get("user_agent", "")
@@ -90,8 +92,10 @@ def bot_stop():
         json.dump({"start": False}, f)
     latest_frame = None
     ss_path = os.path.expanduser("~/aviso_screenshot.png")
-    if os.path.exists(ss_path):
+    try:
         os.remove(ss_path)
+    except OSError:
+        pass
     return jsonify({"status": "ok"})
 
 @app.route("/bot/ad_watched", methods=["POST"])

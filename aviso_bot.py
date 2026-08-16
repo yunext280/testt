@@ -3,16 +3,21 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium_bot import load_cookies, stop_bot
+from selenium_bot import load_cookies, should_stop, stop_bot
 
 
 def login_aviso(driver):
     driver.get("https://aviso.bz")
+    if should_stop():
+        return False
     cookie_path = os.path.expanduser("~/aviso_cookies.json")
     if os.path.exists(cookie_path):
         load_cookies(driver, cookie_path)
         driver.get("https://aviso.bz/members")
-        time.sleep(8)
+        for _ in range(16):
+            if should_stop():
+                return False
+            time.sleep(0.5)
         if "/login" in driver.current_url:
             os.remove(cookie_path)
             sel_path = os.path.expanduser("~/sel_bot.json")

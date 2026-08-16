@@ -51,7 +51,9 @@ def create_driver(user_agent=None):
 
     service = Service(executable_path="/usr/bin/chromedriver")
     service.env = {"DISPLAY": DISPLAY_NUM}
-    return webdriver.Chrome(service=service, options=options)
+    driver = webdriver.Chrome(service=service, options=options)
+    driver.set_page_load_timeout(30)
+    return driver
 
 def load_cookies(driver, filepath):
     with open(filepath) as f:
@@ -62,13 +64,17 @@ def load_cookies(driver, filepath):
         except Exception as e:
             print(f"Cookie add failed: {cookie.get('name')}: {e}")
 
+def should_stop():
+    return _stop_event.is_set()
+
 def wait_for_ad_watched():
     path = os.path.expanduser("~/ad_watched.json")
-    while True:
+    while not _stop_event.is_set():
         if os.path.exists(path):
             os.remove(path)
             return True
         time.sleep(2)
+    return False
 
 def notify_ad_ready():
     try:
@@ -103,8 +109,13 @@ def _bot_worker(user_agent):
         with _driver_lock:
             _driver = driver
         if login_aviso(driver):
+            if should_stop():
+                print("⏹️ تم إيقاف البوت قبل عرض الإعلان")
+                return
             notify_ad_ready()
-            wait_for_ad_watched()
+            if not wait_for_ad_watched():
+                print("⏹️ تم إيقاف البوت أثناء انتظار الإعلان")
+                return
             # cheker = check_sub(driver)
             # if cheker:
             #     pass
