@@ -112,10 +112,22 @@ def close_tap(driver:webdriver) -> None:
         except:
             pass     
 
-
+def complete_page(driver, timeout=30):
+    end = time.time() + timeout
+    while time.time() < end:
+        if _stop_event.is_set():
+            return False
+        try:
+            page_state = driver.execute_script("return document.readyState;")
+            if page_state == "complete":
+                return True
+        except:
+            return False
+        interruptible_sleep(1)
+    return False
 
 def _bot_worker(user_agent):
-    from aviso_bot import login_aviso, Surfing, scrol_Surfing
+    from aviso_bot import login_aviso, Surfing, scrol_Surfing ,av_ytub,av_ytub_ref,yt_url,chek_captcha
     global _driver, _ffmpeg_proc, _bot_thread, _starting
     try:
         _kill_all()
@@ -140,6 +152,23 @@ def _bot_worker(user_agent):
             if not wait_for_ad_watched():
                 print("⏹️ تم إيقاف البوت أثناء انتظار الإعلان")
                 return
+            # Youtube
+            all_tube = av_ytub(driver,30)
+            skrol = 0
+            for tube in all_tube:
+                veryfi = av_ytub_ref(driver,30,tube)
+                if skrol % 5 ==0 :
+                    notify_ad_ready()
+                    if not wait_for_ad_watched():
+                        print("⏹️ تم إيقاف البوت أثناء انتظار الإعلان")
+                        return
+                if "data" not in veryfi:
+                    while chek_captcha(driver,30//3):
+                        interruptible_sleep(1)
+                    yt_url(driver,30,veryfi['sek'],veryfi["tub_id"])
+                elif veryfi["data"] == 'break':
+                    break
+                skrol += 1
             # cheker = check_sub(driver)
             # if cheker:
             #     pass
