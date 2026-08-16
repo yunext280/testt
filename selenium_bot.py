@@ -4,6 +4,9 @@ import threading
 import time
 import urllib.request
 from xvfb_manager import _start_xvfb, _kill_all, start_ffmpeg, DISPLAY_NUM
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 
 _driver = None
 _starting = False
@@ -13,9 +16,7 @@ _ffmpeg_proc = None
 _bot_thread = None
 
 def create_driver(user_agent=None):
-    from selenium import webdriver
-    from selenium.webdriver.chrome.service import Service
-    from selenium.webdriver.chrome.options import Options
+
     options = Options()
     options.binary_location = "/usr/bin/chromium"
 
@@ -93,12 +94,21 @@ def notify_ad_ready():
     except Exception as e:
         print(f"notify_ad_ready failed: {e}")
 
-
+def close_tap(driver:webdriver) -> None:
+        try:
+            handles = driver.window_handles 
+            if len(handles) >1:
+                for cls in range(len(handles)-1,-1,-1):
+                    driver.switch_to.window(driver.window_handles[cls])
+                    if cls >0:
+                        driver.close()
+        except:
+            pass     
 
 
 
 def _bot_worker(user_agent):
-    from aviso_bot import login_aviso  # , check_sub
+    from aviso_bot import login_aviso, Surfing, scrol_Surfing
     global _driver, _ffmpeg_proc, _bot_thread, _starting
     try:
         _kill_all()
@@ -112,6 +122,13 @@ def _bot_worker(user_agent):
             if should_stop():
                 print("⏹️ تم إيقاف البوت قبل عرض الإعلان")
                 return
+            Surfing_ads =Surfing(driver,30)
+            for Surfing_ad in Surfing_ads:
+                if should_stop():
+                    print("⏹️ تم إيقاف البوت أثناء تنفيذ الإعلانات")
+                    return
+                scrol_Surfing(driver,30,Surfing_ad)
+
             notify_ad_ready()
             if not wait_for_ad_watched():
                 print("⏹️ تم إيقاف البوت أثناء انتظار الإعلان")

@@ -1,9 +1,10 @@
-import os
+import os, re
 import time
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium_bot import load_cookies, should_stop, stop_bot
+from selenium_bot import load_cookies, should_stop, stop_bot, close_tap
 
 
 def login_aviso(driver):
@@ -27,6 +28,47 @@ def login_aviso(driver):
             return False
         return True
     return False
+
+
+def scrol_Surfing(driver:webdriver,second:int,ads:object) -> None:
+    if should_stop():
+        return
+    try:
+        close_tap(driver)
+        driver.switch_to.window(driver.window_handles[0])
+        driver.execute_script("arguments[0].scrollIntoView(true);",ads)
+        ser = ads.get_attribute('id')
+        serf_id=ser.replace('serf-link-','serf-id-')
+        sek = WebDriverWait(driver, second).until(EC.invisibility_of_element((By.XPATH,f'//*[@id="{serf_id}"]/div/b[2]'))).get_attribute("outerHTML")
+        sek = int(re.findall(r'\d+', sek)[0])
+        serf= ser.replace('serf-link-','start-serf-')
+        try:
+            WebDriverWait(driver, second).until(EC.element_to_be_clickable((By.XPATH,f'//*[@id="{serf}"]/a'))).click()
+            time.sleep(second//6)
+            if len(driver.window_handles)>1:
+                driver.switch_to.window(driver.window_handles[1])
+                time.sleep(second//6)
+                time.sleep(sek+5)
+                driver.switch_to.window(driver.window_handles[0])
+                confer=ser.replace('serf-link-','serf_btn_confirm_')
+                time.sleep(second//10)
+                WebDriverWait(driver, second).until(EC.element_to_be_clickable((By.ID,confer))).click()
+                time.sleep(second//10)
+                close_tap(driver)
+                time.sleep(second//10)
+        except:
+            WebDriverWait(driver, second).until(EC.visibility_of_element_located((By.CSS_SELECTOR,f'.h-captcha')))
+    except:
+        close_tap(driver)        
+
+def Surfing(driver:webdriver,second:int) -> list:
+    try:
+        driver.get("https://aviso.bz/tasks-surf")
+        Surfing_ads = WebDriverWait(driver,second).until(EC.visibility_of_any_elements_located((By.CLASS_NAME,'work-serf')))
+        return Surfing_ads
+    except:
+        return []
+
 
 
 # def check_yt(driver):
