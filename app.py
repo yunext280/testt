@@ -78,7 +78,7 @@ def bot_start():
     started = selenium_bot.start_bot(user_agent)
     sel_path = os.path.expanduser("~/sel_bot.json")
     with open(sel_path, "w") as f:
-        json.dump({"start": True}, f)
+        json.dump({"start": started}, f)
     return jsonify({"status": "ok" if started else "already_running"})
 
 @app.route("/bot/stop", methods=["POST"])

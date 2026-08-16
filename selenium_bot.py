@@ -140,7 +140,7 @@ def start_bot(user_agent=None):
             with open(ua_path) as f:
                 user_agent = json.load(f).get("user_agent", "")
     with _driver_lock:
-        if _driver is not None or _starting:
+        if _driver is not None:
             return False
         _starting = True
         _stop_event.clear()

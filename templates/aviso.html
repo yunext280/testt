@@ -71,14 +71,10 @@
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script>
     function botStart() {
-        var btn = document.getElementById('btnStart');
-        btn.disabled = true;
         fetch("/bot/start?token={{ token }}", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({user_agent: navigator.userAgent})})
         .then(r=>r.json()).then(()=>location.reload());
     }
     function botStop() {
-        var btn = document.getElementById('btnStop');
-        btn.disabled = true;
         fetch("/bot/stop?token={{ token }}", {method:"POST"})
         .then(r=>r.json()).then(()=>location.reload());
     }
