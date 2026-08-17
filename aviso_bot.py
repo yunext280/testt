@@ -64,6 +64,8 @@ def scrol_Surfing(driver:webdriver,second:int,ads:object) -> None:
 def Surfing(driver:webdriver,second:int) -> list:
     try:
         driver.get("https://aviso.bz/tasks-surf")
+        if complete_page(driver):
+            secondd = second //10
         Surfing_ads = WebDriverWait(driver,second).until(EC.visibility_of_any_elements_located((By.CLASS_NAME,'work-serf')))
         return Surfing_ads
     except:
