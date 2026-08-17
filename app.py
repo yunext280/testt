@@ -163,8 +163,29 @@ def stream_status():
         "ad_pending": ad_pending
     })
 
+@app.route("/health")
+def health():
+    return jsonify({
+        "status": "ok",
+        "bot_running": selenium_bot.is_running(),
+        "version": VERSION
+    })
+
+def auto_restart_bot():
+    import json as _json
+    sel_path = os.path.expanduser("~/sel_bot.json")
+    if os.path.exists(sel_path):
+        try:
+            with open(sel_path) as f:
+                data = _json.load(f)
+                if data.get("start", False):
+                    selenium_bot.start_bot()
+        except:
+            pass
+
 if __name__ == "__main__":
     threading.Thread(target=listen_udp, daemon=True).start()
+    threading.Thread(target=auto_restart_bot, daemon=True).start()
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
