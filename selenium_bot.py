@@ -83,7 +83,7 @@ def wait_for_ad_watched():
         if os.path.exists(path):
             os.remove(path)
             return True
-        time.sleep(2)
+        interruptible_sleep(1)
     return False
 
 def notify_ad_ready():
