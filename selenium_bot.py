@@ -131,6 +131,9 @@ def complete_page(driver, timeout=30):
 
 def start_bot(user_agent=None):
     global _bot_thread
+    if not os.path.exists(os.path.join(os.path.dirname(__file__), "start_bot_aviso.py")):
+        print("ERROR: start_bot_aviso.py not found!")
+        return False
     from start_bot_aviso import _bot_worker
     if not user_agent:
         ua_path = os.path.expanduser("~/user_agent.json")
