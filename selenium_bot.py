@@ -3,15 +3,16 @@ import os
 import threading
 import time
 import urllib.request
-from xvfb_manager import _start_xvfb, _kill_all, start_ffmpeg, DISPLAY_NUM
+from xvfb_manager import DISPLAY_NUM
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 
+_stop_event = threading.Event()
+
 _driver = None
 _starting = False
 _driver_lock = threading.Lock()
-_stop_event = threading.Event()
 _ffmpeg_proc = None
 _bot_thread = None
 
@@ -128,78 +129,9 @@ def complete_page(driver, timeout=30):
         interruptible_sleep(1)
     return False
 
-def _bot_worker(user_agent):
-    from aviso_bot import login_aviso, Surfing, scrol_Surfing ,av_ytub,av_ytub_ref,yt_url,chek_captcha
-    global _driver, _ffmpeg_proc, _bot_thread, _starting
-    try:
-        _kill_all()
-        _start_xvfb()
-        os.environ["DISPLAY"] = DISPLAY_NUM
-        _ffmpeg_proc = start_ffmpeg()
-        driver = create_driver(user_agent)
-        with _driver_lock:
-            _driver = driver
-        if login_aviso(driver):
-            if should_stop():
-                print("⏹️ تم إيقاف البوت قبل عرض الإعلان")
-                return
-            Surfing_ads =Surfing(driver,30)
-            for Surfing_ad in Surfing_ads:
-                if should_stop():
-                    print("⏹️ تم إيقاف البوت أثناء تنفيذ الإعلانات")
-                    return
-                scrol_Surfing(driver,30,Surfing_ad)
-
-            notify_ad_ready()
-            if not wait_for_ad_watched():
-                print("⏹️ تم إيقاف البوت أثناء انتظار الإعلان")
-                return
-            # Youtube
-            all_tube = av_ytub(driver,30)
-            skrol = 0
-            for tube in all_tube:
-                veryfi = av_ytub_ref(driver,30,tube)
-                if skrol % 5 ==0 :
-                    notify_ad_ready()
-                    if not wait_for_ad_watched():
-                        print("⏹️ تم إيقاف البوت أثناء انتظار الإعلان")
-                        return
-                if "data" not in veryfi:
-                    while chek_captcha(driver,30//3):
-                        interruptible_sleep(1)
-                    yt_url(driver,30,veryfi['sek'],veryfi["tub_id"])
-                elif veryfi["data"] == 'break':
-                    break
-                skrol += 1
-            # cheker = check_sub(driver)
-            # if cheker:
-            #     pass
-            # else:
-            #     pass
-        else:
-            return
-        driver.save_screenshot(os.path.expanduser("~/aviso_screenshot.png"))
-        _stop_event.wait()
-    except Exception as e:
-        print(f"⚠️ حدث خطأ أثناء تشغيل البوت: {e}")
-    finally:
-        print("🛑 جاري إغلاق البوت وتنظيف الذاكرة...")
-        if _ffmpeg_proc:
-            _ffmpeg_proc.kill()
-            _ffmpeg_proc = None
-        try:
-            if _driver:
-                _driver.quit()
-        except:
-            pass
-        _kill_all()
-        with _driver_lock:
-            _driver = None
-            _starting = False
-        _bot_thread = None
-
 def start_bot(user_agent=None):
     global _bot_thread
+    from start_bot_aviso import _bot_worker
     if not user_agent:
         ua_path = os.path.expanduser("~/user_agent.json")
         if os.path.exists(ua_path):
@@ -218,6 +150,7 @@ def start_bot(user_agent=None):
 def stop_bot():
     global _bot_thread
     _stop_event.set()
+    from xvfb_manager import _kill_all
     _kill_all()
     if _bot_thread is not None and _bot_thread is not threading.current_thread():
         _bot_thread.join(timeout=10)
