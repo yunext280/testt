@@ -39,7 +39,7 @@ def _bot_worker(user_agent):
             skrol = 0
             for tube in all_tube:
                 veryfi = av_ytub_ref(driver,30,tube)
-                if skrol % 5 ==0 :
+                if skrol > 0 and skrol % 10 ==0 :
                     notify_ad_ready()
                     if not wait_for_ad_watched():
                         print("STOP: Bot stopped while waiting for ad")
