@@ -77,6 +77,8 @@ def interruptible_sleep(seconds):
 
 def wait_for_ad_watched():
     path = os.path.expanduser("~/ad_watched.json")
+    if os.path.exists(path):
+        os.remove(path)
     while not _stop_event.is_set():
         if os.path.exists(path):
             os.remove(path)
