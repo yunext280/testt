@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium_bot import load_cookies, should_stop, stop_bot, close_tap, interruptible_sleep,complete_page
+from selenium.webdriver.common.keys import Keys
 
 
 def login_aviso(driver):
@@ -48,6 +49,10 @@ def scrol_Surfing(driver:webdriver,second:int,ads:object) -> None:
             if len(driver.window_handles)>1:
                 driver.switch_to.window(driver.window_handles[1])
                 interruptible_sleep(second//6)
+                try:
+                    WebDriverWait(driver, second//10).until(EC.invisibility_of_element((By.TAG_NAME,'body'))).send_keys(Keys.ESCAPE)
+                except:
+                    pass
                 interruptible_sleep(sek+5)
                 driver.switch_to.window(driver.window_handles[0])
                 confer=ser.replace('serf-link-','serf_btn_confirm_')
