@@ -6,7 +6,7 @@ DISPLAY_NUM = ":99"
 
 
 def _start_xvfb():
-    print("🚀 جاري تشغيل Xvfb...")
+    print("Starting Xvfb...")
     subprocess.Popen(
         ["sudo", "Xvfb", DISPLAY_NUM, "-screen", "0", "1280x720x24"],
         stdout=subprocess.DEVNULL,
@@ -17,7 +17,7 @@ def _start_xvfb():
 
 
 def _kill_all():
-    print("🔄 جاري تنظيف العمليات القديمة وتهيئة البيئة...")
+    print("Cleaning old processes and preparing environment...")
     subprocess.run(["pkill", "-9", "-f", "chromium"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     subprocess.run(["pkill", "-9", "-f", "ffmpeg"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     subprocess.run(["sudo", "pkill", "-9", "-f", "Xvfb"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
