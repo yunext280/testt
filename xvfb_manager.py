@@ -33,6 +33,7 @@ def start_ffmpeg():
         'ffmpeg', '-y',
         '-f', 'x11grab',
         '-video_size', '1280x720',
+        '-draw_mouse', '0',
         '-i', DISPLAY_NUM,
         '-f', 'image2',
         '-update', '1',
