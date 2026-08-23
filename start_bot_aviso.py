@@ -6,15 +6,10 @@ from selenium_bot import (
     _driver, _driver_lock, _starting, _ffmpeg_proc
 )
 import selenium_bot
-import decryptor
-_avbot = decryptor.decrypt_module(os.path.expanduser("~/aviso_bot.py.enc"))
-login_aviso = _avbot.login_aviso
-Surfing = _avbot.Surfing
-scrol_Surfing = _avbot.scrol_Surfing
-av_ytub = _avbot.av_ytub
-av_ytub_ref = _avbot.av_ytub_ref
-yt_url = _avbot.yt_url
-chek_captcha = _avbot.chek_captcha
+from aviso_bot import (
+    login_aviso, Surfing, scrol_Surfing,
+    av_ytub, av_ytub_ref, yt_url, chek_captcha
+)
 
 def _bot_worker(user_agent):
     try:
