@@ -1,4 +1,8 @@
 import os
+import decryptor
+av = os.path.expanduser("~/aviso_bot.py.enc")
+if os.path.exists(av):
+    decryptor.dectfil(av)
 from xvfb_manager import _start_xvfb, _kill_all, start_ffmpeg, DISPLAY_NUM
 from selenium_bot import (
     create_driver, should_stop, interruptible_sleep,
