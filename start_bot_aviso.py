@@ -36,19 +36,19 @@ def _bot_worker(user_agent):
                     return
                 scrol_Surfing(driver,30,Surfing_ad)
 
-            notify_ad_ready()
-            if not wait_for_ad_watched():
-                print("STOP: Bot stopped while waiting for ad")
-                return
+            # notify_ad_ready()
+            # if not wait_for_ad_watched():
+            #     print("STOP: Bot stopped while waiting for ad")
+            #     return
             all_tube = av_ytub(driver,30)
             skrol = 0
             for tube in all_tube:
                 veryfi = av_ytub_ref(driver,30,tube)
-                if skrol > 0 and skrol % 10 ==0 :
-                    notify_ad_ready()
-                    if not wait_for_ad_watched():
-                        print("STOP: Bot stopped while waiting for ad")
-                        return
+                # if skrol > 0 and skrol % 10 ==0 :
+                #     notify_ad_ready()
+                #     if not wait_for_ad_watched():
+                #         print("STOP: Bot stopped while waiting for ad")
+                #         return
                 if "data" not in veryfi:
                     while chek_captcha(driver,30//3):
                         interruptible_sleep(1)
