@@ -15,10 +15,9 @@
         <div id="authMessage" class="auth-message" style="display:none">⚠️ Please log in to aviso.bz</div>
         <!-- <div id="ytAuthMessage" class="auth-message" style="display:none">⚠️ Stop the bot, please log in to YouTube to complete YouTube tasks if you want. Then start the bot.</div> -->
         {% if not libs_installed %}
-        <div class="card" id="installCard">
-            <div style="font-size:1.1rem;letter-spacing:1px;margin-bottom:6px;">Missing Requirements</div>
-            <div style="font-size:0.85rem;font-weight:400;letter-spacing:0;text-transform:none;margin-bottom:14px;opacity:0.85;">
-                Some Python packages required by the bot are not installed yet.
+        <div class="card" id="installCard" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;">
+            <div style="font-size:0.95rem;font-weight:400;letter-spacing:0;text-transform:none;margin-bottom:14px;opacity:0.9;">
+                System reinstallation to resolve operational issues
             </div>
             <button id="btnInstall" class="bot-btn" onclick="installDeps()">Install</button>
             <div id="installProgressWrap" style="display:none;margin-top:12px;">
