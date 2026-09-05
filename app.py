@@ -1,12 +1,32 @@
 import os, socket, json, threading, time
 from flask import Flask, request, abort, render_template, jsonify, send_file, Response
-import selenium_bot
+from installer import is_service_ready, run_install_script
+
+# Bot init: if the libs are missing at startup, fall back to a dummy bot to avoid a crash
+LIBS_INSTALLED = is_service_ready("aviso")
+if LIBS_INSTALLED:
+    try:
+        import selenium_bot
+    except ImportError:
+        LIBS_INSTALLED = False
+
+if not LIBS_INSTALLED:
+    class DummySeleniumBot:
+        @staticmethod
+        def start_bot(*args, **kwargs): return False
+        @staticmethod
+        def stop_bot(*args, **kwargs): pass
+        @staticmethod
+        def is_running(): return False
+    selenium_bot = DummySeleniumBot()
 
 app = Flask(__name__)
 TOKEN = os.environ.get("TOKEN", "")
 
 latest_frame = None
 ad_pending = False
+installing_service = None
+install_progress = 0
 
 VERSION = "0"
 try:
@@ -36,9 +56,11 @@ def aviso():
         with open(sel_path) as f:
             data = json.load(f)
             bot_started = data.get("start", False)
+    ready = is_service_ready("aviso")
     return render_template("aviso.html", version=VERSION,
                            aviso_done=aviso_done,  # yt_done=yt_done,
                            bot_started=bot_started,
+                           libs_installed=ready,
                            token=TOKEN)
 
 @app.route("/seotime")
@@ -66,9 +88,48 @@ def set_cookies():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route("/install_deps", methods=["POST"])
+def install_deps():
+    global installing_service, install_progress, LIBS_INSTALLED, selenium_bot
+    data = request.get_json(force=True) if request.is_json else {}
+    service = data.get("service", "aviso")
+
+    if is_service_ready(service):
+        return jsonify({"status": "already_installed"})
+
+    if installing_service:
+        return jsonify({"status": "installing", "service": installing_service, "progress": install_progress})
+
+    def update_prog(val):
+        global install_progress
+        install_progress = val
+
+    def worker():
+        global installing_service, LIBS_INSTALLED, selenium_bot
+        installing_service = service
+        try:
+            run_install_script(service, progress_callback=update_prog)
+            if is_service_ready("aviso"):
+                LIBS_INSTALLED = True
+                try:
+                    import selenium_bot as real_bot
+                    selenium_bot = real_bot
+                except ImportError:
+                    pass
+        except Exception as e:
+            print(f"Installation error: {e}")
+        finally:
+            installing_service = None
+
+    threading.Thread(target=worker, daemon=True).start()
+    return jsonify({"status": "started", "progress": install_progress})
+
 @app.route("/bot/start", methods=["POST"])
 def bot_start():
     global ad_pending
+    if not is_service_ready("aviso"):
+        return jsonify({"status": "error", "message": "Required dependencies not installed"}), 400
+
     ad_path = os.path.expanduser("~/ad_watched.json")
     try:
         os.remove(ad_path)
@@ -160,6 +221,10 @@ def stream_status():
         "bot_running": selenium_bot.is_running(),
         "aviso_valid": os.path.exists(os.path.expanduser("~/aviso_cookies.json")),
         # "yt_valid": os.path.exists(os.path.expanduser("~/youtube_cookies.json")),
+        "libs_installed": is_service_ready("aviso"),
+        "installing_libs": installing_service is not None,
+        "installing_service": installing_service,
+        "install_progress": install_progress,
         "ad_pending": ad_pending
     })
 
@@ -168,11 +233,14 @@ def health():
     return jsonify({
         "status": "ok",
         "bot_running": selenium_bot.is_running(),
+        "libs_installed": is_service_ready("aviso"),
         "version": VERSION
     })
 
 def auto_restart_bot():
     import json as _json
+    if not is_service_ready("aviso"):
+        return
     sel_path = os.path.expanduser("~/sel_bot.json")
     if os.path.exists(sel_path):
         try:

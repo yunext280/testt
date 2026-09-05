@@ -14,6 +14,57 @@
         </div>
         <div id="authMessage" class="auth-message" style="display:none">⚠️ Please log in to aviso.bz</div>
         <!-- <div id="ytAuthMessage" class="auth-message" style="display:none">⚠️ Stop the bot, please log in to YouTube to complete YouTube tasks if you want. Then start the bot.</div> -->
+        {% if not libs_installed %}
+        <div class="card" id="installCard">
+            <div style="font-size:1.1rem;letter-spacing:1px;margin-bottom:6px;">Missing Requirements</div>
+            <div style="font-size:0.85rem;font-weight:400;letter-spacing:0;text-transform:none;margin-bottom:14px;opacity:0.85;">
+                Some Python packages required by the bot are not installed yet.
+            </div>
+            <button id="btnInstall" class="bot-btn" onclick="installDeps()">Install</button>
+            <div id="installProgressWrap" style="display:none;margin-top:12px;">
+                <div style="width:100%;height:10px;background:rgba(255,255,255,0.1);border-radius:6px;overflow:hidden;">
+                    <div id="installProgressBar" style="width:0%;height:100%;background:#00ff44;transition:width 0.3s ease;"></div>
+                </div>
+                <div id="installProgressText" style="font-size:0.8rem;margin-top:6px;opacity:0.85;">Starting...</div>
+            </div>
+        </div>
+        <script>
+        (function(){
+            var btnInstall = document.getElementById('btnInstall');
+            var wrap = document.getElementById('installProgressWrap');
+            var bar = document.getElementById('installProgressBar');
+            var txt = document.getElementById('installProgressText');
+            var started = false;
+            window.installDeps = function(){
+                if(btnInstall.disabled) return;
+                btnInstall.disabled = true;
+                fetch("/install_deps?token={{ token }}", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({service:"aviso"})})
+                .then(function(r){return r.json()}).then(function(d){
+                    if(d.status === "already_installed"){
+                        location.reload();
+                        return;
+                    }
+                    wrap.style.display = 'block';
+                    if(!started){
+                        started = true;
+                        setInterval(function(){
+                            fetch("/stream_status?token={{ token }}").then(function(r){return r.json()}).then(function(d){
+                                if(d.installing_libs){
+                                    bar.style.width = (d.install_progress || 0) + '%';
+                                    txt.textContent = (d.install_progress || 0) + '%';
+                                } else {
+                                    location.reload();
+                                }
+                            }).catch(function(){});
+                        }, 2000);
+                    }
+                }).catch(function(){
+                    btnInstall.disabled = false;
+                });
+            };
+        })();
+        </script>
+        {% endif %}
         {% if aviso_done %}
         <div class="stream-status">
             <span class="status-dot" id="statusDot"></span>
