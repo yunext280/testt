@@ -1,4 +1,5 @@
 import os, socket, json, threading, time
+import requests
 from flask import Flask, request, abort, render_template, jsonify, send_file, Response
 from installer import is_service_ready, run_install_script
 
@@ -35,6 +36,13 @@ try:
 except:
     pass
 
+def read_captcha_solv():
+    try:
+        with open(os.path.expanduser("~/captcha_solv.json")) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
 @app.before_request
 def check_token():
     if request.path.startswith("/static/"):
@@ -57,10 +65,13 @@ def aviso():
             data = json.load(f)
             bot_started = data.get("start", False)
     ready = is_service_ready("aviso")
+    solv = read_captcha_solv()
     return render_template("aviso.html", version=VERSION,
                            aviso_done=aviso_done,  # yt_done=yt_done,
                            bot_started=bot_started,
                            libs_installed=ready,
+                           captcha_key=solv.get("captcha_key", ""),
+                           captcha_balance=solv.get("balance_solv", ""),
                            token=TOKEN)
 
 @app.route("/seotime")
@@ -87,6 +98,44 @@ def set_cookies():
         return jsonify({"status": "ok"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route("/set_captcha_key", methods=["POST"])
+def set_captcha_key():
+    try:
+        data = request.get_json(force=True)
+        key = data.get("captcha_key", "").strip()
+        if not key:
+            return jsonify({"status": "error", "message": "Empty key"}), 400
+        path = os.path.expanduser("~/captcha_solv.json")
+        store = read_captcha_solv()
+        store["captcha_key"] = key
+        with open(path, "w") as f:
+            json.dump(store, f, indent=2)
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route("/captcha_balance", methods=["POST"])
+def captcha_balance():
+    store = read_captcha_solv()
+    key = store.get("captcha_key", "")
+    if not key:
+        return jsonify({"balance": None})
+    full_key = key
+    try:
+        resp = requests.get(
+            "https://ru2.sctg.xyz/res.php?",
+            params={"key": full_key, "action": "getbalance"},
+            timeout=15,
+        )
+        balance = resp.text.strip()
+    except Exception:
+        balance = ""
+    store["balance_solv"] = balance
+    path = os.path.expanduser("~/captcha_solv.json")
+    with open(path, "w") as f:
+        json.dump(store, f, indent=2)
+    return jsonify({"balance": balance if balance else None})
 
 @app.route("/install_deps", methods=["POST"])
 def install_deps():
