@@ -102,6 +102,33 @@ body, html {
     cursor: not-allowed;
 }
 
+.icon-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 4px;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+.icon-btn:hover {
+    border-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.icon-btn svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+}
+
 .screenshot-container {
     display: flex;
     justify-content: center;
