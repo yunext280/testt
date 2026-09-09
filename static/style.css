@@ -9,7 +9,10 @@ body, html {
     height: 100%;
     background-color: transparent;
     overflow-y: auto;
+    overflow-x: hidden;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 
@@ -18,7 +21,7 @@ body, html {
     flex-direction: column;
     align-items: center;
     gap: 16px;
-    margin-top: 10vh;
+    margin: 10vh 20px 0;
     z-index: 2;
     position: relative;
 }
@@ -28,7 +31,7 @@ body, html {
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
     padding: 20px 40px;
-    width: 280px;
+    width: min(280px, calc(100vw - 40px));
     text-align: center;
     color: #ffffff;
     text-decoration: none;
@@ -39,6 +42,7 @@ body, html {
     transition: all 0.3s ease;
     backdrop-filter: blur(4px);
     cursor: pointer;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
 }
 
 .card:hover {
@@ -47,11 +51,15 @@ body, html {
     transform: scale(1.05);
 }
 
+.card:active {
+    transform: scale(0.98);
+}
+
 .page-content {
     position: relative;
     z-index: 2;
     text-align: center;
-    margin-top: 10vh;
+    margin: 10vh 20px 0;
     color: #ffffff;
 }
 
@@ -81,6 +89,7 @@ body, html {
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     padding: 10px 30px;
+    max-width: 100%;
     color: #ffffff;
     font-size: 1rem;
     font-weight: 600;
@@ -95,6 +104,10 @@ body, html {
     border-color: rgba(255, 255, 255, 0.8);
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
     transform: scale(1.05);
+}
+
+.bot-btn:active:not(:disabled) {
+    transform: scale(0.97);
 }
 
 .bot-btn:disabled {
@@ -121,6 +134,10 @@ body, html {
 .icon-btn:hover {
     border-color: rgba(255, 255, 255, 0.8);
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.icon-btn:active {
+    transform: scale(0.92);
 }
 
 .icon-btn svg {
@@ -214,7 +231,48 @@ body, html {
     border-radius: 8px;
     margin: 10px auto;
     width: 80%;
+    max-width: min(400px, calc(100vw - 40px));
     z-index: 2;
     position: relative;
     font-size: 13px;
+}
+
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+    .cards-container {
+        margin-top: 5vh;
+        gap: 12px;
+    }
+
+    .page-content {
+        margin-top: 5vh;
+    }
+
+    .card {
+        padding: 18px 20px;
+        font-size: 1.05rem;
+        letter-spacing: 1px;
+    }
+
+    .bot-btn {
+        padding: 10px 20px;
+        letter-spacing: 1px;
+    }
+
+    .stream-url a {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+
+@media (pointer: coarse) {
+    .icon-btn {
+        width: 36px;
+        height: 36px;
+    }
 }
