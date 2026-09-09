@@ -31,7 +31,7 @@ body, html {
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
     padding: 20px 40px;
-    width: min(280px, calc(100vw - 40px));
+    width: 90%;
     text-align: center;
     color: #ffffff;
     text-decoration: none;
@@ -53,6 +53,10 @@ body, html {
 
 .card:active {
     transform: scale(0.98);
+}
+
+#installCard {
+    width: min(340px, 90vw);
 }
 
 .page-content {
