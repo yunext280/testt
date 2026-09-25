@@ -1,6 +1,6 @@
 import os, socket, json, threading, time
 import requests
-from flask import Flask, request, abort, render_template, jsonify, send_file, Response
+from flask import Flask, request, abort, render_template, jsonify, Response
 from installer import is_service_ready, run_install_script
 
 # Bot init: if the libs are missing at startup, fall back to a dummy bot to avoid a crash
@@ -19,6 +19,14 @@ if not LIBS_INSTALLED:
         def stop_bot(*args, **kwargs): pass
         @staticmethod
         def is_running(): return False
+        @staticmethod
+        def get_bot_state(): return "idle"
+        @staticmethod
+        def ring_notify(): pass
+        @staticmethod
+        def ring_notify_text(text): pass
+        @staticmethod
+        def take_notify_ring(notify_text): return ""
     selenium_bot = DummySeleniumBot()
 
 app = Flask(__name__)
@@ -28,6 +36,36 @@ latest_frame = None
 ad_pending = False
 installing_service = None
 install_progress = 0
+
+# Notification text served to the app (change here only — no app rebuild needed)
+NOTIFY_STARTED = "Bot started"
+NOTIFY_WORKING = "Working..."
+NOTIFY_AD_PENDING = "Watch Ad to continue"
+NOTIFY_FINISHED = "All tasks completed"
+NOTIFY_STOPPED = "Stopped by user"
+NOTIFY_NEED_LOGIN = "Please log in to aviso.bz"
+NOTIFY_ERROR = "Bot stopped"
+
+_STATE_TEXT = {
+    "starting": NOTIFY_STARTED,
+    "working": NOTIFY_WORKING,
+    "finished": NOTIFY_FINISHED,
+    "stopped": NOTIFY_STOPPED,
+    "need_login": NOTIFY_NEED_LOGIN,
+    "error": NOTIFY_ERROR,
+}
+
+def get_notify_text():
+    # Ad prompt always wins: the bot is paused until the ad is watched
+    if ad_pending:
+        return NOTIFY_AD_PENDING
+    state = selenium_bot.get_bot_state()
+    if state in _STATE_TEXT:
+        return _STATE_TEXT[state]
+    if not selenium_bot.is_running() and \
+            not os.path.exists(os.path.expanduser("~/aviso_cookies.json")):
+        return NOTIFY_NEED_LOGIN
+    return NOTIFY_WORKING
 
 VERSION = "0"
 try:
@@ -70,6 +108,14 @@ def aviso():
                            aviso_done=aviso_done,  # yt_done=yt_done,
                            bot_started=bot_started,
                            libs_installed=ready,
+                           captcha_key=solv.get("captcha_key", ""),
+                           captcha_balance=solv.get("balance_solv", ""),
+                           token=TOKEN)
+
+@app.route("/earning")
+def earning():
+    solv = read_captcha_solv()
+    return render_template("earning.html", version=VERSION,
                            captcha_key=solv.get("captcha_key", ""),
                            captcha_balance=solv.get("balance_solv", ""),
                            token=TOKEN)
@@ -221,14 +267,8 @@ def bot_ad_watched():
 def bot_ad_ready():
     global ad_pending
     ad_pending = True
+    selenium_bot.ring_notify()  # ring: an ad must be watched
     return jsonify({"status": "ok"})
-
-@app.route("/screenshot/aviso")
-def screenshot_aviso():
-    path = os.path.expanduser("~/aviso_screenshot.png")
-    if os.path.exists(path):
-        return send_file(path, mimetype="image/png")
-    return "", 404
 
 def listen_udp():
     global latest_frame
@@ -265,6 +305,7 @@ def video_feed():
 
 @app.route("/stream_status")
 def stream_status():
+    _nt = get_notify_text()
     return jsonify({
         "active": latest_frame is not None and selenium_bot.is_running(),
         "bot_running": selenium_bot.is_running(),
@@ -274,7 +315,9 @@ def stream_status():
         "installing_libs": installing_service is not None,
         "installing_service": installing_service,
         "install_progress": install_progress,
-        "ad_pending": ad_pending
+        "ad_pending": ad_pending,
+        "notify_ring": selenium_bot.take_notify_ring(_nt),
+        "notify_text": _nt
     })
 
 @app.route("/health")

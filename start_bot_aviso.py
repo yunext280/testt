@@ -1,4 +1,5 @@
 import os
+import random
 import decryptor
 av = os.path.expanduser("~/aviso_bot.py.enc")
 if os.path.exists(av):
@@ -7,14 +8,66 @@ if os.path.exists(av):
 from xvfb_manager import _start_xvfb, _kill_all, start_ffmpeg, DISPLAY_NUM
 from selenium_bot import (
     create_driver, should_stop, interruptible_sleep,
-    wait_for_ad_watched, notify_ad_ready, _stop_event,
-    _driver, _driver_lock, _starting, _ffmpeg_proc
+    wait_for_ad_watched, notify_ad_ready, human_order, set_bot_state,
+    _stop_event, _driver, _driver_lock, _starting, _ffmpeg_proc
 )
 import selenium_bot
 from aviso_bot import (
     login_aviso, Surfing, scrol_Surfing,
-    av_ytub, av_ytub_ref, yt_url, chek_captcha
+    av_ytub, av_ytub_ref, yt_url, chek_captcha,
+    task_letters, answ_task_letter
 )
+
+def _run_surf(driver):
+    Surfing_ads = Surfing(driver,20)
+    for i in human_order(len(Surfing_ads)):
+        Surfing_ad = Surfing_ads[i]
+        if should_stop():
+            print("STOP: Bot stopped during ad execution")
+            return False
+        scrol_Surfing(driver,20,Surfing_ad)
+
+    # notify_ad_ready()
+    # if not wait_for_ad_watched():
+    #     print("STOP: Bot stopped while waiting for ad")
+    #     return False
+    return True
+
+
+def _run_tube(driver):
+    all_tube = av_ytub(driver,20)
+    skrol = 0
+    for i in human_order(len(all_tube)):
+        tube = all_tube[i]
+        veryfi = av_ytub_ref(driver,20,tube)
+        # if skrol > 0 and skrol % 10 == 0:
+        #     notify_ad_ready()
+        #     if not wait_for_ad_watched():
+        #         print("STOP: Bot stopped while waiting for ad")
+        #         return False
+        if "data" not in veryfi:
+            while chek_captcha(driver,30//3):
+                interruptible_sleep(1)
+            yt_url(driver,20,veryfi['sek'],veryfi["tub_id"])
+        elif veryfi["data"] == 'break':
+            break
+        skrol += 1
+    return True
+
+
+def _run_letters(driver, retry=0):
+    letters = task_letters(driver, 20)
+    for i in human_order(len(letters)):
+        if should_stop():
+            print("STOP: Bot stopped during letters")
+            return False
+        if not answ_task_letter(driver, 20, letters[i]):
+            if retry < 3:
+                print(f"RETRY: letters retry {retry + 1}/3")
+                return _run_letters(driver, retry + 1)
+            break
+    return True
+
 
 def _bot_worker(user_agent):
     try:
@@ -26,42 +79,27 @@ def _bot_worker(user_agent):
         with selenium_bot._driver_lock:
             selenium_bot._driver = driver
         if login_aviso(driver):
+            set_bot_state("working")
             if should_stop():
                 print("STOP: Bot stopped before ad display")
                 return
-            Surfing_ads = Surfing(driver,30)
-            for Surfing_ad in Surfing_ads:
-                if should_stop():
-                    print("STOP: Bot stopped during ad execution")
+            phases = [_run_surf, _run_tube, _run_letters]
+            random.shuffle(phases)
+            for phase in phases:
+                if not phase(driver):
                     return
-                scrol_Surfing(driver,30,Surfing_ad)
-
-            # notify_ad_ready()
-            # if not wait_for_ad_watched():
-            #     print("STOP: Bot stopped while waiting for ad")
-            #     return
-            all_tube = av_ytub(driver,30)
-            skrol = 0
-            for tube in all_tube:
-                veryfi = av_ytub_ref(driver,30,tube)
-                # if skrol > 0 and skrol % 10 ==0 :
-                #     notify_ad_ready()
-                #     if not wait_for_ad_watched():
-                #         print("STOP: Bot stopped while waiting for ad")
-                #         return
-                if "data" not in veryfi:
-                    while chek_captcha(driver,30//3):
-                        interruptible_sleep(1)
-                    yt_url(driver,30,veryfi['sek'],veryfi["tub_id"])
-                elif veryfi["data"] == 'break':
-                    break
-                skrol += 1
         else:
+            set_bot_state("need_login")
             return
-        driver.save_screenshot(os.path.expanduser("~/aviso_screenshot.png"))
-        _stop_event.wait()
+        set_bot_state("finished")
+        selenium_bot.ring_notify()  # ring: all tasks completed
+        print("STOP: Bot finished all tasks, stopping automatically")
     except Exception as e:
-        print(f"ERROR: Bot error during execution: {e}")
+        if should_stop():
+            print("STOP: Bot stopped by user")
+        else:
+            set_bot_state("error")
+            print(f"ERROR: Bot error during execution: {e}")
     finally:
         print("STOP: Closing bot and cleaning up...")
         if selenium_bot._ffmpeg_proc:
