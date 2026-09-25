@@ -27,10 +27,11 @@ def _run_surf(driver):
             return False
         scrol_Surfing(driver,20,Surfing_ad)
 
-    # notify_ad_ready()
-    # if not wait_for_ad_watched():
-    #     print("STOP: Bot stopped while waiting for ad")
-    #     return False
+    # Ad after surfing phase
+    notify_ad_ready()
+    if not wait_for_ad_watched():
+        print("STOP: Bot stopped while waiting for ad")
+        return False
     return True
 
 
@@ -40,11 +41,12 @@ def _run_tube(driver):
     for i in human_order(len(all_tube)):
         tube = all_tube[i]
         veryfi = av_ytub_ref(driver,20,tube)
-        # if skrol > 0 and skrol % 10 == 0:
-        #     notify_ad_ready()
-        #     if not wait_for_ad_watched():
-        #         print("STOP: Bot stopped while waiting for ad")
-        #         return False
+        # Ad every 10 finished videos
+        if skrol > 0 and skrol % 10 == 0:
+            notify_ad_ready()
+            if not wait_for_ad_watched():
+                print("STOP: Bot stopped while waiting for ad")
+                return False
         if "data" not in veryfi:
             while chek_captcha(driver,30//3):
                 interruptible_sleep(1)
@@ -82,6 +84,11 @@ def _bot_worker(user_agent):
             set_bot_state("working")
             if should_stop():
                 print("STOP: Bot stopped before ad display")
+                return
+            # Ad appears after verifying valid cookies and logging in
+            notify_ad_ready()
+            if not wait_for_ad_watched():
+                print("STOP: Bot stopped while waiting for ad")
                 return
             phases = [_run_surf, _run_tube, _run_letters]
             random.shuffle(phases)
